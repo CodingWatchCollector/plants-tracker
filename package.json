@@ -23,7 +23,6 @@
 		"@sveltejs/kit": "^2.57.0",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"@types/node": "^24",
-		"@types/web-push": "^3.6.4",
 		"eslint": "^10.2.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.17.0",
@@ -41,7 +40,6 @@
 		"@libsql/client": "^0.17.3",
 		"@negrel/webpush": "npm:@jsr/negrel__webpush@^0.5.0",
 		"browser-image-compression": "^2.0.2",
-		"jose": "^6.2.3",
-		"web-push": "^3.6.7"
+		"jose": "^6.2.3"
 	}
 }

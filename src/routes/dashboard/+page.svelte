@@ -9,7 +9,6 @@
 	import InstallPrompt from '$lib/components/InstallPrompt.svelte';
 	import { onMount } from 'svelte';
 	import { apiFetch } from '$lib/api';
-	import { dev } from '$app/environment';
 
 	let roomFilter = $derived(page.url.searchParams.get('room') ?? '');
 	let rooms = $derived([
@@ -78,13 +77,11 @@
 		<a href={resolve('/plants/new')}>+ Add plant</a>
 	</header>
 	<InstallPrompt />
-	{#if dev}
-		<div style="margin-top: 2rem; padding: 1rem; border: 1px dashed red;">
-			<p>Dev tools</p>
-			<button onclick={testPush}>Send test push</button>
-			{#if testResult}<pre>{testResult}</pre>{/if}
-		</div>
-	{/if}
+	<div style="margin-top: 2rem; padding: 1rem; border: 1px dashed red;">
+		<p>Dev tools</p>
+		<button onclick={testPush}>Send test push</button>
+		{#if testResult}<pre>{testResult}</pre>{/if}
+	</div>
 	{#if pushStatus === 'idle' || pushStatus === 'loading'}
 		<div class="banner">
 			<span>🔔 Enable notifications to get watering reminders</span>

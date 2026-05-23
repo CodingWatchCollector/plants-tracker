@@ -1,11 +1,9 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { dev } from '$app/environment';
 import { getDb } from '$lib/server/db';
 import { sendPushNotification } from '$lib/server/push';
 
 export const POST: RequestHandler = async ({ locals, platform }) => {
-	if (!dev) throw error(404, 'Not found');
 	if (!locals.home) throw error(401, 'Unauthorized');
 
 	const db = getDb(platform);

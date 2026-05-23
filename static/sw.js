@@ -1,3 +1,5 @@
+const _SW_VERSION = '1.0.1'; // bump this on every change
+
 self.addEventListener('push', (event) => {
   if (!event.data) return;
 
@@ -6,8 +8,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title ?? '🌿 Plant Tracker', {
       body: data.body ?? 'Time to check your plants.',
-      icon: '/icon-192.png',
-      badge: '/badge-96.png',
+      icon: '/favicon.svg',
+      badge: '/apple-touch-icon.png',
       tag: 'watering-reminder',
       renotify: true,
       data: { url: data.url ?? '/' }
