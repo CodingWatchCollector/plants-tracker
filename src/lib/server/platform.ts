@@ -6,7 +6,7 @@ import { dev } from '$app/environment';
 // 	VAPID_SUBJECT,
 // 	JWT_SECRET
 // } from '$env/static/private';
-import { PUBLIC_VAPID_PUBLIC_KEY, PUBLIC_APP_URL } from '$env/static/public';
+// import { PUBLIC_VAPID_PUBLIC_KEY, PUBLIC_APP_URL } from '$env/static/public';
 
 // In dev, platform is undefined — read from .env via SvelteKit's env modules instead
 export function getPlatformEnv(platform: App.Platform | undefined): App.Platform['env'] {
@@ -22,8 +22,8 @@ export function getPlatformEnv(platform: App.Platform | undefined): App.Platform
 		VAPID_KEYS: '',
 		VAPID_SUBJECT: '',
 		JWT_SECRET: '',
-		PUBLIC_VAPID_PUBLIC_KEY,
-		PUBLIC_APP_URL,
+		PUBLIC_VAPID_PUBLIC_KEY: '',
+		PUBLIC_APP_URL: '',
 		PLANT_IMAGES: {}
 	};
 }
