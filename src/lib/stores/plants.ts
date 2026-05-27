@@ -45,17 +45,15 @@ function createPlantStore() {
 				method: 'POST'
 			});
 			if (!res.ok) throw new Error(await res.text());
-			console.log(await res.json());
 			const today = new Date().toISOString().split('T')[0];
 			update((plants) =>
 				plants.map((p) =>
 					p.id === id
-						? (console.log('updated', p),
-							{
+						? {
 								...p,
 								last_watered_at: today,
 								next_watering_date: computeNextWateringDate(today, p.watering_interval_days)
-							})
+							}
 						: p
 				)
 			);

@@ -11,6 +11,7 @@ type ENV = {
 	PLANT_IMAGES: R2Bucket;
 	JWT_SECRET: string;
 	PUBLIC_VAPID_PUBLIC_KEY: string;
+	CRON_SECRET: string;
 };
 // for information about these interfaces
 declare global {

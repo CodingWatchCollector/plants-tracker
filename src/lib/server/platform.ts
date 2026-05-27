@@ -24,6 +24,7 @@ export function getPlatformEnv(platform: App.Platform | undefined): App.Platform
 		JWT_SECRET: '',
 		PUBLIC_VAPID_PUBLIC_KEY: '',
 		PUBLIC_APP_URL: '',
+		CRON_SECRET: '',
 		PLANT_IMAGES: {}
 	};
 }

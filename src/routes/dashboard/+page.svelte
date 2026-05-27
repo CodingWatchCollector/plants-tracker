@@ -74,7 +74,10 @@
 <main>
 	<header>
 		<h1>🌿 {$homeStore?.name ?? 'Plant Tracker'}</h1>
-		<a href={resolve('/plants/new')}>+ Add plant</a>
+		<div>
+			<a href={resolve('/plants/new')}>+ Add plant</a>
+			<a href={resolve('/settings')}>Settings</a>
+		</div>
 	</header>
 	<InstallPrompt />
 	<div style="margin-top: 2rem; padding: 1rem; border: 1px dashed red;">
@@ -104,10 +107,7 @@
 		<section>
 			<h2>Due today ({$dueToday.length})</h2>
 			{#each $dueToday as plant (plant.id)}
-				<PlantCard
-					{plant}
-					onwatered={() => (console.log('watered'), plantStore.markWatered(plant.id))}
-				/>
+				<PlantCard {plant} onwatered={() => plantStore.markWatered(plant.id)} />
 			{/each}
 		</section>
 	{/if}
