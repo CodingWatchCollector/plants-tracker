@@ -1,4 +1,5 @@
 import { PUBLIC_VAPID_PUBLIC_KEY } from '$env/static/public';
+
 export function getVapidPublicKey(): ArrayBuffer {
 	const base64 = (PUBLIC_VAPID_PUBLIC_KEY || '').replace(/-/g, '+').replace(/_/g, '/');
 	const raw = atob(base64);
