@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getPlatformEnv } from '$lib/server/platform';
+import { PUBLIC_APP_URL } from '$env/static/public';
 
 export const POST: RequestHandler = async ({ request, locals, platform: platformFromRequest }) => {
 	if (!locals.home) throw error(401, 'Unauthorized');
@@ -31,7 +32,7 @@ export const POST: RequestHandler = async ({ request, locals, platform: platform
 		httpMetadata: { contentType: file.type }
 	});
 
-	const url = `${platformEnv.PUBLIC_APP_URL}/api/images/${key}`;
+	const url = `${PUBLIC_APP_URL}/api/images/${key}`;
 
 	return json({ url });
 };

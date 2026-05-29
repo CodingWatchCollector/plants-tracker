@@ -53,3 +53,11 @@
 		<button onclick={handleDelete}>Delete</button>
 	</div>
 </div>
+
+<style>
+	.card > img {
+		width: 100%;
+		height: auto;
+		max-width: 7rem;
+	}
+</style>
