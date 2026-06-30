@@ -8,7 +8,6 @@
 	import { setupPushNotifications, unsubscribePushNotifications } from '$lib/stores/push';
 	import InstallPrompt from '$lib/components/InstallPrompt.svelte';
 	import { onMount } from 'svelte';
-	import { apiFetch } from '$lib/api';
 
 	let roomFilter = $derived(page.url.searchParams.get('room') ?? '');
 	let rooms = $derived([
@@ -60,15 +59,6 @@
 		await unsubscribePushNotifications();
 		pushStatus = 'idle';
 	}
-
-	// TODO: remove test push
-	let testResult = $state('');
-
-	async function testPush() {
-		const res = await apiFetch(resolve('/api/push/test'), { method: 'POST' });
-		const data = await res.json();
-		testResult = JSON.stringify(data);
-	}
 </script>
 
 <main>
@@ -80,11 +70,6 @@
 		</div>
 	</header>
 	<InstallPrompt />
-	<div style="margin-top: 2rem; padding: 1rem; border: 1px dashed red;">
-		<p>Dev tools</p>
-		<button onclick={testPush}>Send test push</button>
-		{#if testResult}<pre>{testResult}</pre>{/if}
-	</div>
 	{#if pushStatus === 'idle' || pushStatus === 'loading'}
 		<div class="banner">
 			<span>🔔 Enable notifications to get watering reminders</span>

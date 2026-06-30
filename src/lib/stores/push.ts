@@ -1,9 +1,6 @@
 import { getVapidPublicKey } from '$lib/vapid';
 import { apiFetch } from '$lib/api';
-
-const registerServiceWorker = (): Promise<ServiceWorkerRegistration> => {
-	return navigator.serviceWorker.register('/sw.js', { scope: '/' });
-};
+import { resolve } from '$app/paths';
 
 const getOrCreateSubscription = async (
 	reg: ServiceWorkerRegistration
@@ -26,7 +23,7 @@ export const setupPushNotifications = async (): Promise<'granted' | 'denied' | '
 	if (permission !== 'granted') return 'denied';
 
 	try {
-		const reg = await registerServiceWorker();
+		const reg = await navigator.serviceWorker.ready;
 		const subscription = await getOrCreateSubscription(reg);
 		const { endpoint, keys } = subscription.toJSON();
 
@@ -34,7 +31,7 @@ export const setupPushNotifications = async (): Promise<'granted' | 'denied' | '
 			throw new Error('Incomplete subscription data');
 		}
 
-		const res = await apiFetch('/api/push/subscribe', {
+		const res = await apiFetch(resolve('/api/push/subscribe'), {
 			method: 'POST',
 			body: JSON.stringify({
 				endpoint,
@@ -52,15 +49,18 @@ export const setupPushNotifications = async (): Promise<'granted' | 'denied' | '
 };
 
 export const unsubscribePushNotifications = async (): Promise<void> => {
-	const reg = await navigator.serviceWorker.getRegistration('/sw.js');
-	if (!reg) return;
-	const sub = await reg.pushManager.getSubscription();
-	if (!sub) return;
+	try {
+		const reg = await navigator.serviceWorker.ready;
+		const sub = await reg.pushManager.getSubscription();
+		if (!sub) return;
 
-	await apiFetch('/api/push/subscribe', {
-		method: 'DELETE',
-		body: JSON.stringify({ endpoint: sub.endpoint })
-	});
+		await apiFetch(resolve('/api/push/subscribe'), {
+			method: 'DELETE',
+			body: JSON.stringify({ endpoint: sub.endpoint })
+		});
 
-	await sub.unsubscribe();
+		await sub.unsubscribe();
+	} catch (e) {
+		console.error('Unsubscribe failed:', e instanceof Error ? e.message : e);
+	}
 };

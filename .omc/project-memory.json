@@ -1,0 +1,155 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1782671945391,
+  "projectRoot": "/home/abegunenko/personal/plants-tracker",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "@sveltejs/kit",
+        "version": "2.57.0",
+        "category": "fullstack"
+      },
+      {
+        "name": "svelte",
+        "version": "5.55.2",
+        "category": "frontend"
+      },
+      {
+        "name": "vite",
+        "version": "8.0.7",
+        "category": "build"
+      }
+    ],
+    "packageManager": "pnpm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "pnpm build",
+    "testCommand": null,
+    "lintCommand": "pnpm lint",
+    "devCommand": "pnpm dev",
+    "scripts": {
+      "dev": ". ./.env.prod.export && vite dev",
+      "build": "vite build",
+      "preview": "vite preview",
+      "prepare": "svelte-kit sync || echo ''",
+      "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+      "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+      "lint": "prettier --check . && eslint .",
+      "format": "prettier --write ."
+    }
+  },
+  "conventions": {
+    "namingStyle": "camelCase",
+    "importStyle": "ES modules",
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": true,
+    "workspaces": [],
+    "mainDirectories": [
+      "src",
+      "static"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 4,
+      "lastAccessed": 1782671945361,
+      "keyFiles": [
+        "app.d.ts",
+        "app.html",
+        "hooks.server.ts",
+        "service-worker.ts"
+      ]
+    },
+    "static": {
+      "path": "static",
+      "purpose": "Static files",
+      "fileCount": 9,
+      "lastAccessed": 1782671945364,
+      "keyFiles": [
+        "apple-touch-icon.png",
+        "favicon-96x96.png",
+        "favicon.ico",
+        "favicon.svg",
+        "manifest.json"
+      ]
+    },
+    "src/lib": {
+      "path": "src/lib",
+      "purpose": "Library code",
+      "fileCount": 5,
+      "lastAccessed": 1782671945378,
+      "keyFiles": [
+        "api.ts",
+        "image.ts",
+        "types.ts"
+      ]
+    },
+    "src/routes": {
+      "path": "src/routes",
+      "purpose": "Route handlers",
+      "fileCount": 4,
+      "lastAccessed": 1782671945383,
+      "keyFiles": [
+        "+layout.svelte",
+        "+page.svelte",
+        "+page.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "package.json",
+      "accessCount": 1,
+      "lastAccessed": 1782672483287,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/server/migrate.ts",
+      "accessCount": 1,
+      "lastAccessed": 1782673606823,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/server/db.ts",
+      "accessCount": 1,
+      "lastAccessed": 1782673611693,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/server/queries/plants.ts",
+      "accessCount": 1,
+      "lastAccessed": 1782673611898,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

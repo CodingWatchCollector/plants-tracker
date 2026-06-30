@@ -15,9 +15,9 @@ export function getPlatformEnv(platform: App.Platform | undefined): App.Platform
 		return platform.env;
 	}
 
-	console.log('CAUTION: Using dev env');
+	console.log('CAUTION: Using dev env', process.env.TURSO_URL);
 	return {
-		TURSO_URL: '',
+		TURSO_URL: process.env.TURSO_URL || '',
 		TURSO_AUTH_TOKEN: '',
 		VAPID_KEYS: '',
 		VAPID_SUBJECT: '',
