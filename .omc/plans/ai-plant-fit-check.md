@@ -36,19 +36,29 @@ Later (out of scope this week): identify a plant from a photo and feed the resul
 - Runtime: SvelteKit on Cloudflare Pages (`wrangler.toml`, `nodejs_compat` on); env comes from `getPlatformEnv(platform)` in `src/lib/server/platform.ts`, typed in `src/app.d.ts`.
 - DB: Turso via `@libsql/client`, raw SQL, `getDb` in `src/lib/server/db.ts`.
 - Migrations: `src/lib/server/migrate.ts` holds a `migrations` array; each entry runs through a single `db.execute`, so **one SQL statement per migration entry** (or switch that loop to `db.batch`).
-- Gap: `home`, `plants`, `push_subscriptions` were created outside the migration system. New tables go through migrations; existing ones are referenced by name only.
+- Gap: `home`, `plants`, `push_subscriptions` were created outside the migration system, and `runMigrations` is never called anywhere.
+- Production schema (Turso web view, 2026-09-21): `integer PRIMARY KEY AUTOINCREMENT` IDs, `FOREIGN KEY (home_id) REFERENCES home(id) ON DELETE CASCADE`, `text` timestamps defaulting to `datetime('now')`; `home` also has a nullable `email`. `src/lib/types.ts` and the JWT payload (`src/lib/server/jwt.ts`) treat IDs as numbers. New tables follow the same conventions.
 - Auth: a home JWT cookie sets `locals.home` (`src/hooks.server.ts`). `POST /api/home` (`src/routes/api/home/+server.ts`) issues a JWT to anyone, so **every AI route is effectively public and needs its own quota**.
 - Pattern: pages are client-rendered and call JSON routes under `src/routes/api/**` through `apiFetch` (`src/lib/api.ts`); there are no `+page.server.ts` files. New features follow the same pattern.
 - Add-plant form: `src/lib/components/PlantForm.svelte`, page `src/routes/plants/new/+page.svelte`, create route `src/routes/api/plants/+server.ts`.
 - Scripts available: `check`, `lint`, `build`. No test runner is installed yet.
 
-## 4. Data model (new migrations v2+)
+## 4. Data model (migrations v2+)
+
+Each migration entry holds a list of statements and runs them with `db.batch(statements, 'write')`, which libsql executes as one transaction. A failing statement then rolls back the whole version, and `_migrations` is only updated after the batch succeeds.
+
+**v2 (baseline):** the three existing tables and three indexes, copied from the production schema with `CREATE TABLE IF NOT EXISTS` / `CREATE INDEX IF NOT EXISTS`. In production this is a no-op; on a fresh local DB (`file:local.db`) it recreates the real schema so everything else can be tested locally. Two cautions:
+
+- Write expression defaults with parentheses, `DEFAULT (datetime('now'))`. The web view prints them without, and SQLite rejects that form.
+- `IF NOT EXISTS` only compares table names, never columns, so it can't detect drift between production and the migration.
+
+**v3+ (new tables):**
 
 ```sql
--- v2: plant catalog. Named plant_species with a superset of the parked spec's columns
+-- v3: plant catalog. Named plant_species with a superset of the parked spec's columns
 -- so the roadmap's "Plant Intelligence" can reuse it instead of adding a second table.
 CREATE TABLE plant_species (
-  id                     TEXT PRIMARY KEY,
+  id                     INTEGER PRIMARY KEY AUTOINCREMENT,
   scientific_name        TEXT NOT NULL UNIQUE,
   common_name            TEXT NOT NULL,
   aliases                TEXT NOT NULL DEFAULT '[]',   -- JSON array of other common names
@@ -69,9 +79,9 @@ CREATE TABLE plant_species (
   reviewed_at            TEXT NOT NULL
 );
 
--- v3: household profile, one row per home
+-- v4: household profile, one row per home
 CREATE TABLE home_profile (
-  home_id          TEXT PRIMARY KEY,
+  home_id          INTEGER PRIMARY KEY REFERENCES home(id) ON DELETE CASCADE,
   has_cats         INTEGER NOT NULL DEFAULT 0,
   has_dogs         INTEGER NOT NULL DEFAULT 0,
   has_small_kids   INTEGER NOT NULL DEFAULT 0,
@@ -82,12 +92,12 @@ CREATE TABLE home_profile (
   updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- v4: every fit check is logged (quota, debugging, eval material)
+-- v5: every fit check is logged (quota, debugging, eval material)
 CREATE TABLE fit_checks (
-  id              TEXT PRIMARY KEY,
-  home_id         TEXT NOT NULL,
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  home_id         INTEGER NOT NULL REFERENCES home(id) ON DELETE CASCADE,
   candidate_text  TEXT NOT NULL,
-  species_id      TEXT,                 -- null when the candidate is not in the catalog
+  species_id      INTEGER REFERENCES plant_species(id) ON DELETE SET NULL,  -- null when not in the catalog; SET NULL keeps the log if a catalog row is removed
   verdict         TEXT NOT NULL,
   response_json   TEXT NOT NULL,
   model           TEXT NOT NULL,
@@ -98,9 +108,10 @@ CREATE TABLE fit_checks (
   guardrail_fired INTEGER NOT NULL DEFAULT 0,
   created_at      TEXT NOT NULL DEFAULT (datetime('now'))
 );
--- v5
-CREATE INDEX idx_fit_checks_home_created ON fit_checks (home_id, created_at);
+CREATE INDEX idx_fit_checks_home_created ON fit_checks (home_id, created_at);  -- same batch as the table
 ```
+
+`REFERENCES` constraints are only enforced when `PRAGMA foreign_keys` is on for the connection. Check the value on Turso and on the local DB before relying on the cascades.
 
 Owned plants map to catalog rows by matching `plants.name` against `scientific_name`, `common_name` and `aliases` (case-insensitive). The `plants` table doesn't change.
 
@@ -130,7 +141,7 @@ Owned plants map to catalog rows by matching `plants.name` against `scientific_n
 ## 6. Implementation steps
 
 **Day 1: data**
-1. Add migrations v2-v5 to `src/lib/server/migrate.ts` (one statement per entry).
+1. Change migration entries in `src/lib/server/migrate.ts` to `{ version, statements: string[] }` run through `db.batch`, and add v2 (baseline) to v5. Add `scripts/migrate.ts`, which reads `TURSO_URL` / `TURSO_AUTH_TOKEN`, creates a client and calls `runMigrations`, exposed as `pnpm db:migrate`. Run it twice against `file:local.db` (the second run must apply nothing) before running it against production.
 2. `scripts/seed-catalog/`: a list of ~40 common houseplants → the Message Batches API (50% cheaper, asynchronous) drafts rows with structured output → writes `scripts/seed-catalog/catalog.json` → **you review every row by hand**, checking toxicity against a primary source (e.g. the ASPCA plant list) and filling in `source_url` → a separate import script upserts into `plant_species`. Only reviewed rows get imported.
 3. Add `ANTHROPIC_API_KEY` and `AI_GATEWAY_URL` to `src/app.d.ts` and `.env.example`, and set them with `wrangler secret put`. Set a monthly spend limit in the Anthropic console.
 
