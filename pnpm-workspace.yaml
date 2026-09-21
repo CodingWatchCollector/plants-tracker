@@ -2,3 +2,6 @@ allowBuilds:
   esbuild: true
   sharp: true
   workerd: true
+
+# Skip package versions published less than 7 days ago (value in minutes)
+minimumReleaseAge: 10080
