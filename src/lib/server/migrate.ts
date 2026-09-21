@@ -24,35 +24,37 @@ const migrations: Migration[] = [
 			`CREATE TABLE IF NOT EXISTS home (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        join_token TEXT NOT NULL,
         email TEXT,
+        join_token TEXT NOT NULL UNIQUE,
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       )`,
 			`CREATE TABLE IF NOT EXISTS plants (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        home_id INTEGER NOT NULL REFERENCES home(id) ON DELETE CASCADE,
+        home_id INTEGER NOT NULL,
         name TEXT NOT NULL,
         nickname TEXT,
         room TEXT,
         image_url TEXT,
-        watering_interval_days INTEGER NOT NULL,
+        watering_interval_days INTEGER NOT NULL DEFAULT 7,
         last_watered_at TEXT,
         next_watering_date TEXT NOT NULL,
         notes TEXT,
         created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        CONSTRAINT fk_plants_home_id_home_id_fk FOREIGN KEY (home_id) REFERENCES home(id) ON DELETE CASCADE
       )`,
 			`CREATE TABLE IF NOT EXISTS push_subscriptions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        home_id INTEGER NOT NULL REFERENCES home(id) ON DELETE CASCADE,
+        home_id INTEGER NOT NULL,
         endpoint TEXT NOT NULL,
         p256dh_key TEXT NOT NULL,
         auth_key TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        CONSTRAINT fk_push_subscriptions_home_id_home_id_fk FOREIGN KEY (home_id) REFERENCES home(id) ON DELETE CASCADE
       )`,
-			`CREATE UNIQUE INDEX IF NOT EXISTS idx_home_join_token ON home(join_token)`,
+			`CREATE INDEX IF NOT EXISTS idx_plants_next_watering ON plants(next_watering_date)`,
 			`CREATE INDEX IF NOT EXISTS idx_plants_home_id ON plants(home_id)`,
-			`CREATE UNIQUE INDEX IF NOT EXISTS idx_push_subscriptions_home_endpoint ON push_subscriptions(home_id, endpoint)`
+			`CREATE INDEX IF NOT EXISTS idx_push_home_id ON push_subscriptions(home_id)`
 		]
 	},
 	{
@@ -94,6 +96,14 @@ const migrations: Migration[] = [
         notes            TEXT CHECK (length(notes) <= 500),
         updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
       )`
+		]
+	},
+	{
+		// push_subscriptions upsert does INSERT ... ON CONFLICT(home_id, endpoint),
+		// but no unique constraint on that pair exists yet — every call fails.
+		version: 4,
+		statements: [
+			`CREATE UNIQUE INDEX IF NOT EXISTS idx_push_home_id_endpoint ON push_subscriptions(home_id, endpoint)`
 		]
 	}
 ];
