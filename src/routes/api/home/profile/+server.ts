@@ -33,10 +33,7 @@ export const PUT: RequestHandler = async ({ request, locals, platform }) => {
 	) {
 		throw error(400, 'Invalid typical_light');
 	}
-	if (
-		data.notes !== undefined &&
-		(typeof data.notes !== 'string' || data.notes.length > 500)
-	) {
+	if (data.notes !== undefined && (typeof data.notes !== 'string' || data.notes.length > 500)) {
 		throw error(400, 'Notes must be 500 characters or fewer');
 	}
 
