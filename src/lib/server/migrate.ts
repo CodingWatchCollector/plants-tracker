@@ -93,7 +93,7 @@ const migrations: Migration[] = [
         care_commitment  TEXT NOT NULL DEFAULT 'medium' CHECK (care_commitment IN ('low','medium','high')),
         typical_light    TEXT NOT NULL DEFAULT 'medium' CHECK (typical_light IN ('low','medium','bright')),
         travels_often    INTEGER NOT NULL DEFAULT 0,
-        notes            TEXT CHECK (length(notes) <= 500),
+        notes            TEXT NOT NULL DEFAULT '' CHECK (length(notes) <= 500),
         updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
       )`
 		]

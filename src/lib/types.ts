@@ -30,4 +30,16 @@ export interface PushSubscription {
 	created_at: string;
 }
 
+export interface HomeProfile {
+	home_id: number;
+	has_cats: boolean;
+	has_dogs: boolean;
+	has_small_kids: boolean;
+	care_commitment: 'low' | 'medium' | 'high';
+	typical_light: 'low' | 'medium' | 'bright';
+	travels_often: boolean;
+	notes: string;
+	updated_at: string | null;
+}
+
 export type PlantFormData = Omit<Plant, 'id' | 'home_id' | 'created_at' | 'updated_at'>;
