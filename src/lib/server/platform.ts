@@ -10,21 +10,21 @@ import { dev } from '$app/environment';
 
 // In dev, platform is undefined — read from .env via SvelteKit's env modules instead
 export function getPlatformEnv(platform: App.Platform | undefined): App.Platform['env'] {
-	if (!dev) {
-		if (!platform?.env) throw new Error('Platform env not available');
-		return platform.env;
-	}
+  if (!dev) {
+    if (!platform?.env) throw new Error('Platform env not available');
+    return platform.env;
+  }
 
-	console.log('CAUTION: Using dev env');
-	return {
-		TURSO_URL: process.env.TURSO_URL || '',
-		TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN || '',
-		VAPID_KEYS: '',
-		VAPID_SUBJECT: '',
-		JWT_SECRET: '',
-		PUBLIC_VAPID_PUBLIC_KEY: '',
-		PUBLIC_APP_URL: '',
-		CRON_SECRET: '',
-		PLANT_IMAGES: {}
-	};
+  console.log('CAUTION: Using dev env');
+  return {
+    TURSO_URL: process.env.TURSO_URL || '',
+    TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN || '',
+    VAPID_KEYS: '',
+    VAPID_SUBJECT: '',
+    JWT_SECRET: '',
+    PUBLIC_VAPID_PUBLIC_KEY: '',
+    PUBLIC_APP_URL: '',
+    CRON_SECRET: '',
+    PLANT_IMAGES: {},
+  };
 }

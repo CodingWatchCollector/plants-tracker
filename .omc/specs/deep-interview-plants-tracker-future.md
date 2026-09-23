@@ -1,6 +1,7 @@
 # Deep Interview Spec: Plants Tracker — Future Development
 
 ## Metadata
+
 - Interview ID: plants-tracker-future-001
 - Rounds: 16 (Rounds 1–9 in session 82df373f, Rounds 10–16 resumed in session 2b6791c6)
 - Final Ambiguity Score: 18%
@@ -15,27 +16,27 @@
 
 ## Clarity Breakdown
 
-| Dimension | Score | Weight | Weighted |
-|-----------|-------|--------|----------|
-| Goal Clarity | 0.86 | 35% | 0.301 |
-| Constraint Clarity | 0.82 | 25% | 0.205 |
-| Success Criteria | 0.79 | 25% | 0.198 |
-| Context Clarity | 0.78 | 15% | 0.117 |
-| **Total Clarity** | | | **0.821** |
-| **Ambiguity** | | | **18%** |
+| Dimension          | Score | Weight | Weighted  |
+| ------------------ | ----- | ------ | --------- |
+| Goal Clarity       | 0.86  | 35%    | 0.301     |
+| Constraint Clarity | 0.82  | 25%    | 0.205     |
+| Success Criteria   | 0.79  | 25%    | 0.198     |
+| Context Clarity    | 0.78  | 15%    | 0.117     |
+| **Total Clarity**  |       |        | **0.821** |
+| **Ambiguity**      |       |        | **18%**   |
 
 ---
 
 ## Topology
 
-| Component | Status | Description | Coverage |
-|-----------|--------|-------------|----------|
-| Watering History | active | `plant_care_events` table tracking each care event; enables undo mis-click, per-plant history view, future analytics | Ship #1. Done: user taps a plant, sees log, deletes any past entry. |
-| Plant Intelligence | active | Species lookup via Perenual API + DB cache; default watering schedules pre-filled on plant creation | Ship #2. Done: user types name, picks species, schedule pre-filled. |
-| Members / Identity | active | Minimal identity layer with recovery token; no mandatory login | Ship #3. Done: user gets recovery token on first visit, restores garden on new device. |
-| Notification UX | active | Per-device notification timing + mark-all-watered action in push | Ship #4. Done: user sets preferred time per device, can mark all watered from notification. |
-| Multi-home / Space UX | active | Space-switching UI (schema already ready) + invite revocation/rotation | Ship #5. Done: user switches between spaces, manages invite links. |
-| Offline / Resilience | active | Offline write queue for "mark as watered" with no internet | Lowest priority. Assess cheap foundational steps; SW already caches reads. |
+| Component             | Status | Description                                                                                                          | Coverage                                                                                    |
+| --------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Watering History      | active | `plant_care_events` table tracking each care event; enables undo mis-click, per-plant history view, future analytics | Ship #1. Done: user taps a plant, sees log, deletes any past entry.                         |
+| Plant Intelligence    | active | Species lookup via Perenual API + DB cache; default watering schedules pre-filled on plant creation                  | Ship #2. Done: user types name, picks species, schedule pre-filled.                         |
+| Members / Identity    | active | Minimal identity layer with recovery token; no mandatory login                                                       | Ship #3. Done: user gets recovery token on first visit, restores garden on new device.      |
+| Notification UX       | active | Per-device notification timing + mark-all-watered action in push                                                     | Ship #4. Done: user sets preferred time per device, can mark all watered from notification. |
+| Multi-home / Space UX | active | Space-switching UI (schema already ready) + invite revocation/rotation                                               | Ship #5. Done: user switches between spaces, manages invite links.                          |
+| Offline / Resilience  | active | Offline write queue for "mark as watered" with no internet                                                           | Lowest priority. Assess cheap foundational steps; SW already caches reads.                  |
 
 ---
 
@@ -71,6 +72,7 @@ Extend Plants Tracker — a deployed PWA (SvelteKit/Svelte 5, Cloudflare Pages, 
 ## Acceptance Criteria
 
 ### Watering History (#1)
+
 - [ ] A `plant_care_events` table exists with columns: `id, plant_id, home_id, care_type ENUM('water','fertilize','repot','other'), performed_at DATETIME, notes TEXT (nullable)`
 - [ ] `plants.last_watered_at` column is removed; dashboard derives last watered from `plant_care_events` via JOIN
 - [ ] `plants.next_watering_date` is retained as a precomputed column (cron query performance)
@@ -80,6 +82,7 @@ Extend Plants Tracker — a deployed PWA (SvelteKit/Svelte 5, Cloudflare Pages, 
 - [ ] Deleting an event recalculates `next_watering_date` for the plant
 
 ### Plant Intelligence (#2)
+
 - [ ] A `plant_species` table exists: `id, common_name, scientific_name, watering_interval_days INT, care_tips TEXT (nullable), source ENUM('seed','api'), last_fetched_at DATETIME`
 - [ ] `plants.species_id` column added as a nullable FK to `plant_species.id`
 - [ ] Plant creation form includes a species search field with autocomplete
@@ -89,6 +92,7 @@ Extend Plants Tracker — a deployed PWA (SvelteKit/Svelte 5, Cloudflare Pages, 
 - [ ] Perenual API key is stored in environment config (not hardcoded)
 
 ### Members / Identity (#3)
+
 - [ ] A `members` table exists: `id, recovery_token_hash TEXT, email TEXT (nullable), created_at DATETIME`
 - [ ] On first app visit, a `member` record is created and a recovery token is generated (shown once, copyable/QR)
 - [ ] `push_subscriptions` table has a `member_id FK → members.id`
@@ -98,6 +102,7 @@ Extend Plants Tracker — a deployed PWA (SvelteKit/Svelte 5, Cloudflare Pages, 
 - [ ] A `members.tier` column exists (default: 'free') for future monetization enforcement
 
 ### Notification UX (#4)
+
 - [ ] `notification_preferences` table exists: `id, member_id FK, preferred_hour INT, preferred_minute INT, timezone TEXT, enabled BOOL`
 - [ ] Settings page allows user to set their preferred notification time
 - [ ] Push notifications are sent at the user's preferred time (cron checks `notification_preferences`)
@@ -106,6 +111,7 @@ Extend Plants Tracker — a deployed PWA (SvelteKit/Svelte 5, Cloudflare Pages, 
 - [ ] Notification preference is per-member (syncs across devices signed in as the same member)
 
 ### Multi-home / Space UX (#5)
+
 - [ ] "Home" is renamed to "Space" in all UI labels (DB column `name` already holds the user-chosen label)
 - [ ] A Space switcher is accessible from the main nav/header
 - [ ] User can revoke an invite link (generates a new token, old token stops working)
@@ -113,6 +119,7 @@ Extend Plants Tracker — a deployed PWA (SvelteKit/Svelte 5, Cloudflare Pages, 
 - [ ] Each space's plant list is isolated; switching spaces changes the dashboard context
 
 ### Offline / Resilience (foundation — low priority)
+
 - [ ] Audit current SW (`src/service-worker.ts`) and document which routes are cached and which fail offline
 - [ ] Identify the minimal schema/queue shape for offline write support (write-ahead queue design doc) — implementation deferred
 
@@ -174,16 +181,16 @@ ALTER TABLE push_subscriptions ADD COLUMN member_id TEXT REFERENCES members(id);
 
 ## Assumptions Exposed & Resolved
 
-| Assumption | Challenge | Resolution |
-|------------|-----------|------------|
-| "Home" is the right term | Public users may have multiple locations, offices, etc. | Renamed to "Space" — UI label only, `name` column unchanged |
-| Watering-only events table | User mentioned fertilizing, health state over time | General `plant_care_events` with `care_type` enum |
-| Fixed cron for notifications | Evening vs morning timing; whose preference wins? | Per-member preferred time; cron uses `notification_preferences` |
-| No user concept needed | Notification prefs must attach to something; recovery requires identity | Minimal `members` table with recovery token, no mandatory login |
-| Plant count has no upper bound | Freemium model discussed | `members.tier` column deferred but schema-ready |
-| Last watered is a scalar | Undo requires history; analytics require event log | `plant_care_events` table; `last_watered_at` removed |
-| Undo = time-limited (like Gmail) | Does a countdown add friction for plant watering? | Any-time undo — hard delete any past event |
-| API-backed species from the start | Could seed manually to avoid API dependency | API-first (Perenual) accepted; 100 req/day free tier sufficient |
+| Assumption                        | Challenge                                                               | Resolution                                                      |
+| --------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------- |
+| "Home" is the right term          | Public users may have multiple locations, offices, etc.                 | Renamed to "Space" — UI label only, `name` column unchanged     |
+| Watering-only events table        | User mentioned fertilizing, health state over time                      | General `plant_care_events` with `care_type` enum               |
+| Fixed cron for notifications      | Evening vs morning timing; whose preference wins?                       | Per-member preferred time; cron uses `notification_preferences` |
+| No user concept needed            | Notification prefs must attach to something; recovery requires identity | Minimal `members` table with recovery token, no mandatory login |
+| Plant count has no upper bound    | Freemium model discussed                                                | `members.tier` column deferred but schema-ready                 |
+| Last watered is a scalar          | Undo requires history; analytics require event log                      | `plant_care_events` table; `last_watered_at` removed            |
+| Undo = time-limited (like Gmail)  | Does a countdown add friction for plant watering?                       | Any-time undo — hard delete any past event                      |
+| API-backed species from the start | Could seed manually to avoid API dependency                             | API-first (Perenual) accepted; 100 req/day free tier sufficient |
 
 ---
 
@@ -192,8 +199,9 @@ ALTER TABLE push_subscriptions ADD COLUMN member_id TEXT REFERENCES members(id);
 **Stack:** SvelteKit/Svelte 5, Cloudflare Pages + Workers, Turso SQLite, R2 (photos), Web Push VAPID
 
 **Key existing files:**
+
 - `src/lib/server/queries/plants.ts:128-143` — current `mark as watered` logic (updates `last_watered_at`); needs to be replaced with `plant_care_events` INSERT
-- `src/lib/server/queries/plants.ts:127` — existing TODO: *"possibly pass date as param, so we can undo watering or set a specific date"* — now resolved by the events table
+- `src/lib/server/queries/plants.ts:127` — existing TODO: _"possibly pass date as param, so we can undo watering or set a specific date"_ — now resolved by the events table
 - `src/service-worker.ts` — already does stale-while-revalidate for `/api/plants`; push subscription handling
 - `src/lib/server/platform.ts` — Cloudflare env/platform bindings
 - `src/lib/server/db.ts` — Turso client
@@ -205,14 +213,14 @@ ALTER TABLE push_subscriptions ADD COLUMN member_id TEXT REFERENCES members(id);
 
 ## Ship Order & "Done" Definitions
 
-| # | Feature | Done When |
-|---|---------|-----------|
-| 1 | Watering History | User taps a plant → sees chronological care log → can delete any past entry |
-| 2 | Plant Intelligence | User types a plant name → picks from species suggestions → watering schedule pre-filled |
-| 3 | Members / Identity | User gets recovery token on first visit → can enter token on new device → garden restored |
-| 4 | Notification UX | User sets preferred notification time → receives push at that time → can mark all watered from notification |
-| 5 | Multi-home / Space UX | User can switch between spaces from nav → can revoke/rotate invite links |
-| — | Offline Resilience | Foundational audit + write-queue design doc (full implementation deferred) |
+| #   | Feature               | Done When                                                                                                   |
+| --- | --------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 1   | Watering History      | User taps a plant → sees chronological care log → can delete any past entry                                 |
+| 2   | Plant Intelligence    | User types a plant name → picks from species suggestions → watering schedule pre-filled                     |
+| 3   | Members / Identity    | User gets recovery token on first visit → can enter token on new device → garden restored                   |
+| 4   | Notification UX       | User sets preferred notification time → receives push at that time → can mark all watered from notification |
+| 5   | Multi-home / Space UX | User can switch between spaces from nav → can revoke/rotate invite links                                    |
+| —   | Offline Resilience    | Foundational audit + write-queue design doc (full implementation deferred)                                  |
 
 ---
 
@@ -231,15 +239,15 @@ This spec feeds a product walkthrough for the graphic designer co-owner. Key poi
 
 ## Ontology (Key Entities)
 
-| Entity | Type | Fields | Relationships |
-|--------|------|--------|---------------|
-| Plant | core domain | id, home_id, species_id (nullable), name, room, next_watering_date, photo_url | belongs to Space; has many CareEvents; optionally linked to Species |
-| Space (Home) | core domain | id, name, invite_token | has many Plants; has many Members (via membership) |
-| CareEvent | core domain | id, plant_id, home_id, care_type, performed_at, notes | belongs to Plant; belongs to Space |
-| Member | core domain | id, recovery_token_hash, email (nullable), tier | has one NotificationPreference; has many PushSubscriptions |
-| Species | supporting | id, common_name, scientific_name, watering_interval_days, care_tips, source | optionally referenced by many Plants |
-| PushSubscription | supporting | id, member_id, endpoint, keys | belongs to Member |
-| NotificationPreference | supporting | id, member_id, preferred_hour, preferred_minute, timezone, enabled | belongs to Member |
+| Entity                 | Type        | Fields                                                                        | Relationships                                                       |
+| ---------------------- | ----------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Plant                  | core domain | id, home_id, species_id (nullable), name, room, next_watering_date, photo_url | belongs to Space; has many CareEvents; optionally linked to Species |
+| Space (Home)           | core domain | id, name, invite_token                                                        | has many Plants; has many Members (via membership)                  |
+| CareEvent              | core domain | id, plant_id, home_id, care_type, performed_at, notes                         | belongs to Plant; belongs to Space                                  |
+| Member                 | core domain | id, recovery_token_hash, email (nullable), tier                               | has one NotificationPreference; has many PushSubscriptions          |
+| Species                | supporting  | id, common_name, scientific_name, watering_interval_days, care_tips, source   | optionally referenced by many Plants                                |
+| PushSubscription       | supporting  | id, member_id, endpoint, keys                                                 | belongs to Member                                                   |
+| NotificationPreference | supporting  | id, member_id, preferred_hour, preferred_minute, timezone, enabled            | belongs to Member                                                   |
 
 ---
 

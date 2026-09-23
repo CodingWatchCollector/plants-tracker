@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1782671945391,
-  "projectRoot": "/home/abegunenko/personal/plants-tracker",
+  "lastScanned": 1790194370246,
+  "projectRoot": "/home/bech/code/plants-tracker",
   "techStack": {
     "languages": [
       {
@@ -47,14 +47,16 @@
     "lintCommand": "pnpm lint",
     "devCommand": "pnpm dev",
     "scripts": {
-      "dev": ". ./.env.prod.export && vite dev",
+      "dev": "vite dev --mode develop",
       "build": "vite build",
       "preview": "vite preview",
       "prepare": "svelte-kit sync || echo ''",
       "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
       "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
       "lint": "prettier --check . && eslint .",
-      "format": "prettier --write ."
+      "format": "prettier --write .",
+      "db:migrate": "node --env-file=.env.develop scripts/migrate.ts",
+      "db:seed": "tsx --env-file .env.develop scripts/seed-catalog.ts"
     }
   },
   "conventions": {
@@ -67,6 +69,7 @@
     "isMonorepo": true,
     "workspaces": [],
     "mainDirectories": [
+      "scripts",
       "src",
       "static"
     ],
@@ -77,11 +80,22 @@
   },
   "customNotes": [],
   "directoryMap": {
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 3,
+      "lastAccessed": 1790194370228,
+      "keyFiles": [
+        "migrate.ts",
+        "seed-catalog.ts",
+        "verify-seed.ts"
+      ]
+    },
     "src": {
       "path": "src",
       "purpose": "Source code",
       "fileCount": 4,
-      "lastAccessed": 1782671945361,
+      "lastAccessed": 1790194370229,
       "keyFiles": [
         "app.d.ts",
         "app.html",
@@ -93,7 +107,7 @@
       "path": "static",
       "purpose": "Static files",
       "fileCount": 9,
-      "lastAccessed": 1782671945364,
+      "lastAccessed": 1790194370236,
       "keyFiles": [
         "apple-touch-icon.png",
         "favicon-96x96.png",
@@ -106,7 +120,7 @@
       "path": "src/lib",
       "purpose": "Library code",
       "fileCount": 5,
-      "lastAccessed": 1782671945378,
+      "lastAccessed": 1790194370240,
       "keyFiles": [
         "api.ts",
         "image.ts",
@@ -117,7 +131,7 @@
       "path": "src/routes",
       "purpose": "Route handlers",
       "fileCount": 4,
-      "lastAccessed": 1782671945383,
+      "lastAccessed": 1790194370241,
       "keyFiles": [
         "+layout.svelte",
         "+page.svelte",
@@ -128,26 +142,302 @@
   "hotPaths": [
     {
       "path": "package.json",
-      "accessCount": 1,
-      "lastAccessed": 1782672483287,
+      "accessCount": 6,
+      "lastAccessed": 1790109574047,
       "type": "file"
     },
     {
       "path": "src/lib/server/migrate.ts",
-      "accessCount": 1,
-      "lastAccessed": 1782673606823,
+      "accessCount": 4,
+      "lastAccessed": 1790108509378,
       "type": "file"
     },
     {
       "path": "src/lib/server/db.ts",
-      "accessCount": 1,
-      "lastAccessed": 1782673611693,
+      "accessCount": 4,
+      "lastAccessed": 1790108515848,
+      "type": "file"
+    },
+    {
+      "path": "scripts/seed-catalog.ts",
+      "accessCount": 3,
+      "lastAccessed": 1790109777204,
+      "type": "file"
+    },
+    {
+      "path": "src/app.d.ts",
+      "accessCount": 3,
+      "lastAccessed": 1790110115538,
       "type": "file"
     },
     {
       "path": "src/lib/server/queries/plants.ts",
+      "accessCount": 3,
+      "lastAccessed": 1790111153317,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/api/home/invite/+server.ts",
+      "accessCount": 2,
+      "lastAccessed": 1790024453351,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/api/home/join/[join_token]/+server.ts",
+      "accessCount": 2,
+      "lastAccessed": 1790024453929,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/api/plants/[id]/+server.ts",
+      "accessCount": 2,
+      "lastAccessed": 1790024454493,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/api/plants/[id]/water/+server.ts",
+      "accessCount": 2,
+      "lastAccessed": 1790024455386,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/api/push/subscribe/+server.ts",
+      "accessCount": 2,
+      "lastAccessed": 1790024455728,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/api/cron/water-check/+server.ts",
+      "accessCount": 2,
+      "lastAccessed": 1790024455836,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/api/images/[...key]/+server.ts",
+      "accessCount": 2,
+      "lastAccessed": 1790024455946,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/api.ts",
+      "accessCount": 2,
+      "lastAccessed": 1790024503205,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/api/plants/+server.ts",
+      "accessCount": 2,
+      "lastAccessed": 1790111153608,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/settings/+page.svelte",
+      "accessCount": 2,
+      "lastAccessed": 1790111154090,
+      "type": "file"
+    },
+    {
+      "path": "src/hooks.server.ts",
+      "accessCount": 2,
+      "lastAccessed": 1790111154297,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/types.ts",
       "accessCount": 1,
-      "lastAccessed": 1782673611898,
+      "lastAccessed": 1789995115680,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/server/platform.ts",
+      "accessCount": 1,
+      "lastAccessed": 1789995120910,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/server/jwt.ts",
+      "accessCount": 1,
+      "lastAccessed": 1789995121782,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/server/tokens.ts",
+      "accessCount": 1,
+      "lastAccessed": 1789995122100,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/api/home/+server.ts",
+      "accessCount": 1,
+      "lastAccessed": 1789995133340,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/api/images/+server.ts",
+      "accessCount": 1,
+      "lastAccessed": 1789995134499,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/components/PlantForm.svelte",
+      "accessCount": 1,
+      "lastAccessed": 1789995135796,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/components/ImageUpload.svelte",
+      "accessCount": 1,
+      "lastAccessed": 1789995139103,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/image.ts",
+      "accessCount": 1,
+      "lastAccessed": 1789995139556,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/plants/new/+page.svelte",
+      "accessCount": 1,
+      "lastAccessed": 1789995140380,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/plants/[id]/edit/+page.svelte",
+      "accessCount": 1,
+      "lastAccessed": 1789995140883,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/+page.svelte",
+      "accessCount": 1,
+      "lastAccessed": 1789995141334,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/+layout.svelte",
+      "accessCount": 1,
+      "lastAccessed": 1789995141745,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/setup/+page.svelte",
+      "accessCount": 1,
+      "lastAccessed": 1789995142200,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/dashboard/+page.svelte",
+      "accessCount": 1,
+      "lastAccessed": 1789995142705,
+      "type": "file"
+    },
+    {
+      "path": "svelte.config.js",
+      "accessCount": 1,
+      "lastAccessed": 1789995143021,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/stores/home.ts",
+      "accessCount": 1,
+      "lastAccessed": 1789995145464,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/stores/plants.ts",
+      "accessCount": 1,
+      "lastAccessed": 1789995145862,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "accessCount": 1,
+      "lastAccessed": 1789995146322,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/components/PlantCard.svelte",
+      "accessCount": 1,
+      "lastAccessed": 1789995146736,
+      "type": "file"
+    },
+    {
+      "path": "AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1789995147968,
+      "type": "file"
+    },
+    {
+      "path": ".claude/worktrees/migrate-v2-v3/src/lib/types.ts",
+      "accessCount": 1,
+      "lastAccessed": 1790024400484,
+      "type": "file"
+    },
+    {
+      "path": ".claude/worktrees/migrate-v2-v3/src/lib/server/jwt.ts",
+      "accessCount": 1,
+      "lastAccessed": 1790024400808,
+      "type": "file"
+    },
+    {
+      "path": ".claude/worktrees/migrate-v2-v3/src/lib/server/migrate.ts",
+      "accessCount": 1,
+      "lastAccessed": 1790024415402,
+      "type": "file"
+    },
+    {
+      "path": ".claude/worktrees/migrate-v2-v3/src/lib/server/db.ts",
+      "accessCount": 1,
+      "lastAccessed": 1790024415843,
+      "type": "file"
+    },
+    {
+      "path": ".claude/worktrees/migrate-v2-v3/src/lib/server/queries/plants.ts",
+      "accessCount": 1,
+      "lastAccessed": 1790024422155,
+      "type": "file"
+    },
+    {
+      "path": ".claude/worktrees/migrate-v2-v3/src/routes/api/home/+server.ts",
+      "accessCount": 1,
+      "lastAccessed": 1790024432006,
+      "type": "file"
+    },
+    {
+      "path": ".claude/worktrees/migrate-v2-v3/src/routes/api/plants/+server.ts",
+      "accessCount": 1,
+      "lastAccessed": 1790024432400,
+      "type": "file"
+    },
+    {
+      "path": ".claude/worktrees/migrate-v2-v3/src/hooks.server.ts",
+      "accessCount": 1,
+      "lastAccessed": 1790024432504,
+      "type": "file"
+    },
+    {
+      "path": ".claude/worktrees/migrate-v2-v3-wip/src/lib/server/migrate.ts",
+      "accessCount": 1,
+      "lastAccessed": 1790024480250,
+      "type": "file"
+    },
+    {
+      "path": ".env.develop",
+      "accessCount": 1,
+      "lastAccessed": 1790108504892,
+      "type": "file"
+    },
+    {
+      "path": "scripts/migrate.ts",
+      "accessCount": 1,
+      "lastAccessed": 1790108509702,
+      "type": "file"
+    },
+    {
+      "path": "vite.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1790109432129,
       "type": "file"
     }
   ],

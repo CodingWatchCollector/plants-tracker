@@ -3,64 +3,64 @@ import { apiFetch } from '$lib/api';
 import { resolve } from '$app/paths';
 
 const getOrCreateSubscription = async (
-	reg: ServiceWorkerRegistration
+  reg: ServiceWorkerRegistration
 ): Promise<PushSubscription> => {
-	const existing = await reg.pushManager.getSubscription();
-	if (existing) return existing;
+  const existing = await reg.pushManager.getSubscription();
+  if (existing) return existing;
 
-	return reg.pushManager.subscribe({
-		userVisibleOnly: true,
-		applicationServerKey: getVapidPublicKey()
-	});
+  return reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: getVapidPublicKey(),
+  });
 };
 
 export const setupPushNotifications = async (): Promise<'granted' | 'denied' | 'unsupported'> => {
-	if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-		return 'unsupported';
-	}
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    return 'unsupported';
+  }
 
-	const permission = await Notification.requestPermission();
-	if (permission !== 'granted') return 'denied';
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') return 'denied';
 
-	try {
-		const reg = await navigator.serviceWorker.ready;
-		const subscription = await getOrCreateSubscription(reg);
-		const { endpoint, keys } = subscription.toJSON();
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const subscription = await getOrCreateSubscription(reg);
+    const { endpoint, keys } = subscription.toJSON();
 
-		if (!endpoint || !keys?.p256dh || !keys?.auth) {
-			throw new Error('Incomplete subscription data');
-		}
+    if (!endpoint || !keys?.p256dh || !keys?.auth) {
+      throw new Error('Incomplete subscription data');
+    }
 
-		const res = await apiFetch(resolve('/api/push/subscribe'), {
-			method: 'POST',
-			body: JSON.stringify({
-				endpoint,
-				p256dh_key: keys.p256dh,
-				auth_key: keys.auth
-			})
-		});
+    const res = await apiFetch(resolve('/api/push/subscribe'), {
+      method: 'POST',
+      body: JSON.stringify({
+        endpoint,
+        p256dh_key: keys.p256dh,
+        auth_key: keys.auth,
+      }),
+    });
 
-		if (!res.ok) throw new Error(await res.text());
-		return 'granted';
-	} catch (e) {
-		console.error('Push setup failed:', e instanceof Error ? e.message : e);
-		return 'denied';
-	}
+    if (!res.ok) throw new Error(await res.text());
+    return 'granted';
+  } catch (e) {
+    console.error('Push setup failed:', e instanceof Error ? e.message : e);
+    return 'denied';
+  }
 };
 
 export const unsubscribePushNotifications = async (): Promise<void> => {
-	try {
-		const reg = await navigator.serviceWorker.ready;
-		const sub = await reg.pushManager.getSubscription();
-		if (!sub) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (!sub) return;
 
-		await apiFetch(resolve('/api/push/subscribe'), {
-			method: 'DELETE',
-			body: JSON.stringify({ endpoint: sub.endpoint })
-		});
+    await apiFetch(resolve('/api/push/subscribe'), {
+      method: 'DELETE',
+      body: JSON.stringify({ endpoint: sub.endpoint }),
+    });
 
-		await sub.unsubscribe();
-	} catch (e) {
-		console.error('Unsubscribe failed:', e instanceof Error ? e.message : e);
-	}
+    await sub.unsubscribe();
+  } catch (e) {
+    console.error('Unsubscribe failed:', e instanceof Error ? e.message : e);
+  }
 };
