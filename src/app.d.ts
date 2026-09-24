@@ -12,8 +12,7 @@ type ENV = {
   JWT_SECRET: string;
   PUBLIC_VAPID_PUBLIC_KEY: string;
   CRON_SECRET: string;
-  ANTHROPIC_API_KEY: string;
-  AI_GATEWAY_URL: string;
+  OPENROUTER_API_KEY: string;
   TREFLE_API_KEY: string;
 };
 // for information about these interfaces

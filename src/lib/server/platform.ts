@@ -25,6 +25,8 @@ export function getPlatformEnv(platform: App.Platform | undefined): App.Platform
     PUBLIC_VAPID_PUBLIC_KEY: '',
     PUBLIC_APP_URL: '',
     CRON_SECRET: '',
+    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY || '',
+    TREFLE_API_KEY: process.env.TREFLE_API_KEY || '',
     PLANT_IMAGES: {},
   };
 }
