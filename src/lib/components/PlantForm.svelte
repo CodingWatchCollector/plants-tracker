@@ -56,42 +56,81 @@
   }
 </script>
 
-<form onsubmit={handleSubmit}>
+<form class="panel" onsubmit={handleSubmit}>
   <ImageUpload bind:value={image_url} />
-  <label>
+
+  <label class="field">
     Plant name *
     <input bind:value={name} placeholder="e.g. Monstera deliciosa" required />
   </label>
 
-  <label>
-    Nickname
-    <input bind:value={nickname} placeholder="e.g. The big one in the corner" />
-  </label>
+  <div class="row">
+    <label class="field">
+      Nickname
+      <input bind:value={nickname} placeholder="e.g. The big one in the corner" />
+    </label>
 
-  <label>
-    Room
-    <input bind:value={room} placeholder="e.g. Living room" />
-  </label>
+    <label class="field">
+      Room
+      <input bind:value={room} placeholder="e.g. Living room" />
+    </label>
+  </div>
 
-  <label>
-    Watering every (days)
-    <input type="number" bind:value={watering_interval_days} min="1" max="365" />
-  </label>
+  <div class="row">
+    <label class="field">
+      Watering every (days)
+      <input type="number" bind:value={watering_interval_days} min="1" max="365" />
+    </label>
 
-  <label>
-    Last watered
-    <input type="date" bind:value={last_watered_at} />
-  </label>
+    <label class="field">
+      Last watered
+      <input type="date" bind:value={last_watered_at} />
+    </label>
+  </div>
 
-  <label>
+  <label class="field">
     Notes
     <textarea bind:value={notes} placeholder="Any care notes..." rows="3"></textarea>
   </label>
 
   {#if error}<p class="error">{error}</p>{/if}
 
-  <button type="submit" disabled={loading}>
-    {loading ? 'Saving...' : 'Save plant'}
-  </button>
-  <a href={resolve('/dashboard')}>Cancel</a>
+  <div class="form-actions">
+    <a class="button ghost" href={resolve('/dashboard')}>Cancel</a>
+    <button type="submit" disabled={loading}>
+      {loading ? 'Saving...' : 'Save plant'}
+    </button>
+  </div>
 </form>
+
+<style>
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .row {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 560px) {
+    .row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+  }
+
+  @media (max-width: 559px) {
+    .form-actions > :global(*) {
+      flex: 1;
+    }
+  }
+</style>

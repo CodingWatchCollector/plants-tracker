@@ -11,5 +11,25 @@
   }
 </script>
 
-<h1>Add a plant</h1>
-<PlantForm onsubmit={handleSubmit} />
+<div class="page narrow">
+  <header>
+    <a class="back" href={resolve('/dashboard')}>← Back</a>
+    <h1>Add a plant</h1>
+  </header>
+  <PlantForm onsubmit={handleSubmit} />
+</div>
+
+<style>
+  .narrow {
+    width: 100%;
+    max-width: 40rem;
+    margin: 0 auto;
+    gap: 1rem;
+  }
+
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+</style>

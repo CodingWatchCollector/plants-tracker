@@ -15,16 +15,18 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    min-height: 100dvh;
   }
 
   main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 1rem;
     width: 100%;
-    max-width: 64rem;
+    max-width: var(--column-width);
     margin: 0 auto;
-    box-sizing: border-box;
+    padding: var(--gutter);
+    padding-top: max(var(--gutter), env(safe-area-inset-top));
+    padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
   }
 </style>

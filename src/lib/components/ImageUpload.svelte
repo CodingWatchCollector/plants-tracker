@@ -78,14 +78,16 @@
   {#if preview}
     <div class="preview">
       <img src={preview} alt="Plant" />
-      <button type="button" onclick={removeImage}>Remove</button>
+      <button type="button" class="small remove" onclick={removeImage}>Remove</button>
     </div>
   {:else}
-    <label class="upload-area">
+    <label class="upload-area" class:loading>
       {#if loading}
+        <span class="icon" aria-hidden="true">⏳</span>
         <span>Uploading...</span>
       {:else}
-        <span>📷 Add photo</span>
+        <span class="icon" aria-hidden="true">📷</span>
+        <span>Add photo</span>
         <span class="hint">Camera or gallery</span>
       {/if}
       <input
@@ -103,3 +105,66 @@
     <p class="error">{error}</p>
   {/if}
 </div>
+
+<style>
+  .image-upload {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    min-height: 9rem;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      background-color 0.15s;
+  }
+
+  .upload-area:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+
+  .upload-area.loading {
+    cursor: progress;
+  }
+
+  .icon {
+    font-size: 1.75rem;
+  }
+
+  .hint {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 400;
+  }
+
+  .preview {
+    position: relative;
+  }
+
+  .preview img {
+    width: 100%;
+    max-height: 18rem;
+    border-radius: var(--radius);
+    object-fit: cover;
+  }
+
+  .remove {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: color-mix(in srgb, var(--surface) 85%, transparent);
+    backdrop-filter: blur(4px);
+  }
+</style>

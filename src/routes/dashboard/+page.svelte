@@ -61,19 +61,30 @@
   }
 </script>
 
-<main>
-  <header>
-    <h1>🌿 {$homeStore?.name ?? 'Plant Tracker'}</h1>
-    <div>
-      <a href={resolve('/plants/new')}>+ Add plant</a>
-      <a href={resolve('/settings')}>Settings</a>
+<div class="page">
+  <header class="page-header">
+    <div class="title">
+      <span class="eyebrow">Your home</span>
+      <h1>🌿 {$homeStore?.name ?? 'Plant Tracker'}</h1>
     </div>
+    <nav class="header-actions">
+      <a class="button primary" href={resolve('/plants/new')}>+ Add plant</a>
+      <a class="button" href={resolve('/settings')} aria-label="Settings"
+        >⚙️<span class="label">Settings</span></a
+      >
+    </nav>
   </header>
+
   <InstallPrompt />
+
   {#if pushStatus === 'idle' || pushStatus === 'loading'}
     <div class="banner">
       <span>🔔 Enable notifications to get watering reminders</span>
-      <button onclick={enableNotifications} disabled={pushStatus === 'loading'}>
+      <button
+        class="primary small"
+        onclick={enableNotifications}
+        disabled={pushStatus === 'loading'}
+      >
         {pushStatus === 'loading' ? 'Setting up...' : 'Enable'}
       </button>
     </div>
@@ -84,46 +95,173 @@
   {:else if pushStatus === 'granted'}
     <div class="banner banner--success">
       <span>🔔 Notifications enabled</span>
-      <button onclick={disableNotifications}>Disable</button>
+      <button class="ghost small" onclick={disableNotifications}>Disable</button>
     </div>
   {/if}
 
   {#if $dueToday.length > 0}
     <section>
-      <h2>Due today ({$dueToday.length})</h2>
-      {#each $dueToday as plant (plant.id)}
-        <PlantCard {plant} onwatered={() => plantStore.markWatered(plant.id)} />
-      {/each}
+      <h2>Due today <span class="count count--due">{$dueToday.length}</span></h2>
+      <div class="grid">
+        {#each $dueToday as plant (plant.id)}
+          <PlantCard {plant} onwatered={() => plantStore.markWatered(plant.id)} />
+        {/each}
+      </div>
     </section>
   {/if}
 
   {#if $dueSoon.length > 0}
     <section>
-      <h2>Coming up</h2>
-      {#each $dueSoon as plant (plant.id)}
-        <PlantCard {plant} />
-      {/each}
+      <h2>Coming up <span class="count">{$dueSoon.length}</span></h2>
+      <div class="grid">
+        {#each $dueSoon as plant (plant.id)}
+          <PlantCard {plant} />
+        {/each}
+      </div>
     </section>
   {/if}
 
   <section>
-    <h2>All plants</h2>
+    <h2>All plants <span class="count">{$plantStore.length}</span></h2>
 
     {#if rooms.length > 1}
-      <div class="filters">
-        <button class:active={roomFilter === ''} onclick={() => setRoom('')}>All</button>
+      <div class="filters" role="group" aria-label="Filter by room">
+        <button class="chip" class:active={roomFilter === ''} onclick={() => setRoom('')}
+          >All</button
+        >
         {#each rooms as room (room)}
-          <button class:active={roomFilter === room} onclick={() => setRoom(room)}>{room}</button>
+          <button class="chip" class:active={roomFilter === room} onclick={() => setRoom(room)}>
+            {room}
+          </button>
         {/each}
       </div>
     {/if}
 
     {#if filtered.length === 0}
-      <p>No plants yet. <a href={resolve('/plants/new')}>Add your first one.</a></p>
+      <div class="empty panel">
+        <div class="empty-icon" aria-hidden="true">🪴</div>
+        <p>No plants yet.</p>
+        <a class="button primary" href={resolve('/plants/new')}>Add your first one</a>
+      </div>
     {:else}
-      {#each filtered as plant (plant.id)}
-        <PlantCard {plant} onwatered={() => plantStore.markWatered(plant.id)} />
-      {/each}
+      <div class="grid">
+        {#each filtered as plant (plant.id)}
+          <PlantCard {plant} onwatered={() => plantStore.markWatered(plant.id)} />
+        {/each}
+      </div>
     {/if}
   </section>
-</main>
+</div>
+
+<style>
+  .title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .header-actions .label {
+    display: none;
+  }
+
+  @media (min-width: 560px) {
+    .header-actions .label {
+      display: inline;
+    }
+  }
+
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.6rem;
+    height: 1.6rem;
+    padding: 0 0.45rem;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .count--due {
+    background: var(--water-soft);
+    color: var(--water);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: 0.75rem;
+  }
+
+  .filters {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0.1rem var(--gutter) 0.25rem;
+    scrollbar-width: none;
+  }
+
+  .filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chip {
+    flex: none;
+    min-height: 2.1rem;
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+  }
+
+  .chip.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--on-primary);
+  }
+
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding-block: 2.5rem;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .empty-icon {
+    font-size: 2.5rem;
+  }
+</style>

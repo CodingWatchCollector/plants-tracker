@@ -1,4 +1,6 @@
 import { dev } from '$app/environment';
+import { env as privateEnv } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 // import {
 // 	TURSO_URL,
 // 	TURSO_AUTH_TOKEN,
@@ -17,16 +19,16 @@ export function getPlatformEnv(platform: App.Platform | undefined): App.Platform
 
   console.log('CAUTION: Using dev env');
   return {
-    TURSO_URL: process.env.TURSO_URL || '',
-    TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN || '',
-    VAPID_KEYS: '',
-    VAPID_SUBJECT: '',
-    JWT_SECRET: '',
-    PUBLIC_VAPID_PUBLIC_KEY: '',
-    PUBLIC_APP_URL: '',
-    CRON_SECRET: '',
-    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY || '',
-    TREFLE_API_KEY: process.env.TREFLE_API_KEY || '',
+    TURSO_URL: privateEnv.TURSO_URL || '',
+    TURSO_AUTH_TOKEN: privateEnv.TURSO_AUTH_TOKEN || '',
+    VAPID_KEYS: privateEnv.VAPID_KEYS || '',
+    VAPID_SUBJECT: privateEnv.VAPID_SUBJECT || '',
+    JWT_SECRET: privateEnv.JWT_SECRET || '',
+    PUBLIC_VAPID_PUBLIC_KEY: publicEnv.PUBLIC_VAPID_PUBLIC_KEY || '',
+    PUBLIC_APP_URL: publicEnv.PUBLIC_APP_URL || '',
+    CRON_SECRET: privateEnv.CRON_SECRET || '',
+    OPENROUTER_API_KEY: privateEnv.OPENROUTER_API_KEY || '',
+    TREFLE_API_KEY: privateEnv.TREFLE_API_KEY || '',
     PLANT_IMAGES: {},
   };
 }

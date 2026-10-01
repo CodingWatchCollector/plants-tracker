@@ -28,13 +28,41 @@
   });
 </script>
 
-<main>
-  {#if status === 'loading'}
-    <p>Joining home...</p>
-  {:else if status === 'success'}
-    <p>✅ Joined <strong>{homeName}</strong>. Redirecting...</p>
-  {:else}
-    <p>❌ {errorMsg}</p>
-    <a href={resolve('/')}>Go home</a>
-  {/if}
-</main>
+<div class="center">
+  <div class="panel card">
+    {#if status === 'loading'}
+      <div class="icon" aria-hidden="true">🌱</div>
+      <p class="muted">Joining home...</p>
+    {:else if status === 'success'}
+      <div class="icon" aria-hidden="true">✅</div>
+      <p>Joined <strong>{homeName}</strong>.</p>
+      <p class="muted">Redirecting...</p>
+    {:else}
+      <div class="icon" aria-hidden="true">❌</div>
+      <p class="error">{errorMsg}</p>
+      <a class="button" href={resolve('/')}>Go home</a>
+    {/if}
+  </div>
+</div>
+
+<style>
+  .center {
+    flex: 1;
+    display: grid;
+    place-items: center;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 24rem;
+    text-align: center;
+  }
+
+  .icon {
+    font-size: 2.5rem;
+  }
+</style>

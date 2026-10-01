@@ -27,9 +27,33 @@
   }
 </script>
 
-{#if plant}
-  <h1>Edit {plant.nickname ?? plant.name}</h1>
-  <PlantForm {plant} onsubmit={handleSubmit} />
-{:else}
-  <p>Loading...</p>
-{/if}
+<div class="page narrow">
+  <header>
+    <a class="back" href={resolve('/dashboard')}>← Back</a>
+    {#if plant}<h1>Edit {plant.nickname ?? plant.name}</h1>{/if}
+  </header>
+  {#if plant}
+    <PlantForm {plant} onsubmit={handleSubmit} />
+  {:else}
+    <p class="muted">Loading...</p>
+  {/if}
+</div>
+
+<style>
+  .narrow {
+    width: 100%;
+    max-width: 40rem;
+    margin: 0 auto;
+    gap: 1rem;
+  }
+
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  h1 {
+    overflow-wrap: anywhere;
+  }
+</style>
