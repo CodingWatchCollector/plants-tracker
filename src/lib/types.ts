@@ -42,4 +42,26 @@ export interface HomeProfile {
   updated_at: string | null;
 }
 
+export interface PlantSpecies {
+  id: number;
+  scientific_name: string;
+  common_name: string;
+  aliases: string[];
+  watering_interval_days: number;
+  drought_tolerance: 'low' | 'medium' | 'high';
+  care_level: 'low' | 'medium' | 'high';
+  light_needs: 'low' | 'medium' | 'bright';
+  toxic_to_cats: boolean;
+  toxic_to_dogs: boolean;
+  toxicity_notes: string | null;
+  growth_habit: 'trailing' | 'upright' | 'tree' | 'rosette' | 'climbing';
+  leaf_size: 'small' | 'medium' | 'large';
+  leaf_shape: string;
+  variegated: boolean;
+  care_tips: string | null;
+  source: string;
+  source_url: string | null;
+  reviewed_at: string;
+}
+
 export type PlantFormData = Omit<Plant, 'id' | 'home_id' | 'created_at' | 'updated_at'>;

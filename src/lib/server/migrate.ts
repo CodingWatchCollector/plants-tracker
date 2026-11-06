@@ -106,6 +106,28 @@ const migrations: Migration[] = [
       `CREATE UNIQUE INDEX IF NOT EXISTS idx_push_home_id_endpoint ON push_subscriptions(home_id, endpoint)`,
     ],
   },
+  {
+    // Every AI fit check is logged: quota counting, debugging, eval material.
+    version: 5,
+    statements: [
+      `CREATE TABLE fit_checks (
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        home_id         INTEGER NOT NULL REFERENCES home(id) ON DELETE CASCADE,
+        candidate_text  TEXT NOT NULL,
+        species_id      INTEGER REFERENCES plant_species(id) ON DELETE SET NULL,
+        verdict         TEXT NOT NULL,
+        response_json   TEXT NOT NULL,
+        model           TEXT NOT NULL,
+        prompt_version  TEXT NOT NULL,
+        input_tokens    INTEGER,
+        output_tokens   INTEGER,
+        latency_ms      INTEGER,
+        guardrail_fired INTEGER NOT NULL DEFAULT 0,
+        created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+      )`,
+      `CREATE INDEX idx_fit_checks_home_created ON fit_checks (home_id, created_at)`,
+    ],
+  },
 ];
 
 export async function runMigrations(db: Client) {
