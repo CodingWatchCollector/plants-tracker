@@ -8,7 +8,12 @@
   let error = $state('');
   let inviteLink = $state('');
 
-  async function createHome() {
+  async function createHome(e: Event) {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    if (!form.reportValidity()) {
+      return;
+    }
     if (!name.trim()) return;
     loading = true;
     error = '';

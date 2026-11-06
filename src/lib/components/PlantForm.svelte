@@ -34,7 +34,12 @@
     image_url = plant.image_url ?? null;
   });
 
-  async function handleSubmit() {
+  async function handleSubmit(e: Event) {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    if (!form.reportValidity()) {
+      return;
+    }
     if (!name.trim()) return;
     loading = true;
     error = '';
