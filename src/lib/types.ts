@@ -64,4 +64,10 @@ export interface PlantSpecies {
   reviewed_at: string;
 }
 
+// A plant the household owns, with its catalog row when the name matched one.
+export interface OwnedPlant {
+  name: string;
+  species: PlantSpecies | null;
+}
+
 export type PlantFormData = Omit<Plant, 'id' | 'home_id' | 'created_at' | 'updated_at'>;

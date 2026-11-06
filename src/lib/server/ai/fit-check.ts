@@ -1,7 +1,7 @@
 import { OpenRouter } from '@openrouter/sdk';
 import z from 'zod';
 import { FIT_CHECK_SYSTEM_PROMPT, PROMPT_VERSION } from './fit-check-prompt';
-import type { HomeProfile, PlantSpecies } from '$lib/types';
+import type { HomeProfile, OwnedPlant, PlantSpecies } from '$lib/types';
 import type { Client } from '@libsql/client';
 import { logFitCheck } from '../queries/fit-checks';
 
@@ -18,9 +18,6 @@ const schema = z.object({
   identified_as: z.string().nullable(),
 });
 export type AiFitCheckResponse = z.infer<typeof schema>;
-
-// A plant the household owns, with its catalog row when the name matched one.
-export type OwnedPlant = { name: string; species: PlantSpecies | null };
 
 type GetAiFitCheckProps = {
   client: OpenRouter;
