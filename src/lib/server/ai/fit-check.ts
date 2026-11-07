@@ -19,6 +19,22 @@ const schema = z.object({
 });
 export type AiFitCheckResponse = z.infer<typeof schema>;
 
+// refused: the model declined. invalid_response: truncated, empty, or not matching the schema.
+// provider_error: the request itself failed (network, routing, rate limit, bad key).
+export type FitCheckFailure = 'refused' | 'invalid_response' | 'provider_error';
+export type FitCheckResult =
+  | { ok: true; response: AiFitCheckResponse }
+  | { ok: false; failure: FitCheckFailure };
+
+class FitCheckError extends Error {
+  constructor(
+    readonly failure: FitCheckFailure,
+    message: string
+  ) {
+    super(message);
+  }
+}
+
 type GetAiFitCheckProps = {
   client: OpenRouter;
   db: Client;
@@ -40,7 +56,7 @@ export const getAiFitCheck = ({
   homeId,
   candidate,
   rawClientPrompt,
-}: GetAiFitCheckProps): Promise<AiFitCheckResponse | null> => {
+}: GetAiFitCheckProps): Promise<FitCheckResult> => {
   const startTime = performance.now();
   return client.chat
     .send({
@@ -73,24 +89,28 @@ export const getAiFitCheck = ({
     })
     .then((res) => {
       if (res instanceof ReadableStream) {
-        throw new Error('unexpected streaming response');
+        throw new FitCheckError('provider_error', 'unexpected streaming response');
       }
       const rawResponse = res.choices[0];
       const finishReason = rawResponse.finishReason;
       if (finishReason !== 'stop') {
         console.log({ finishReason });
-        throw new Error(`unexpected finishReason: ${finishReason}`);
+        throw new FitCheckError('invalid_response', `unexpected finishReason: ${finishReason}`);
       }
       if (rawResponse.message.refusal) {
         console.log({ refusal: rawResponse.message.refusal });
-        throw new Error('received refusal message');
+        throw new FitCheckError('refused', 'received refusal message');
       }
       const content = rawResponse.message.content;
       if (typeof content !== 'string') {
         console.log({ content });
-        throw new Error('wrong content type');
+        throw new FitCheckError('invalid_response', 'wrong content type');
       }
-      const parsedResponse = schema.parse(JSON.parse(content));
+      const parsed = schema.safeParse(parseJson(content));
+      if (!parsed.success) {
+        throw new FitCheckError('invalid_response', `schema mismatch: ${parsed.error.message}`);
+      }
+      const parsedResponse = parsed.data;
       const guardrailedResponse = applyFitCheckGuardrail({
         response: parsedResponse,
         candidate,
@@ -109,12 +129,23 @@ export const getAiFitCheck = ({
         outputTokens: res.usage?.completionTokens,
         latencyMs: Math.round(performance.now() - startTime),
         guardrailFired: guardrailedResponse.guardrailFired,
-      }).then(() => guardrailedResponse.response);
+      }).then((): FitCheckResult => ({ ok: true, response: guardrailedResponse.response }));
     })
-    .catch((error) => {
+    .catch((error): FitCheckResult => {
       console.error(`[GetAiFitCheck error] ${error?.message || 'unknown error'}`);
-      return null;
+      return {
+        ok: false,
+        failure: error instanceof FitCheckError ? error.failure : 'provider_error',
+      };
     });
+};
+
+const parseJson = (text: string): unknown => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
 };
 
 // Block names match the ones the system prompt refers to (HOME_NOTES, CATALOG).
