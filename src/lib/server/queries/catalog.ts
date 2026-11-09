@@ -14,7 +14,7 @@ const speciesNameMatch = (species: string, name: string) => `(
 // Escapes LIKE wildcards so user input is matched literally (used with ESCAPE '\').
 const escapeLike = (text: string) => text.replace(/[\\%_]/g, (c) => `\\${c}`);
 
-function rowToSpecies(row: Record<string, unknown>): PlantSpecies {
+export function rowToSpecies(row: Record<string, unknown>): PlantSpecies {
   return {
     id: row.id as number,
     scientific_name: row.scientific_name as string,
