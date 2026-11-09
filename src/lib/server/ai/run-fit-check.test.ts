@@ -10,6 +10,19 @@ import {
   runFitCheck,
 } from './run-fit-check';
 
+// Lets one test make the alternatives lookup fail while everything else stays real.
+const alternativesControl = vi.hoisted(() => ({ fail: false }));
+vi.mock('../queries/alternatives', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../queries/alternatives')>();
+  return {
+    ...actual,
+    getAlternatives: (...args: Parameters<typeof actual.getAlternatives>) => {
+      if (alternativesControl.fail) throw new Error('alternatives down');
+      return actual.getAlternatives(...args);
+    },
+  };
+});
+
 let db: Client;
 
 const modelAnswer = (overrides: Partial<AiFitCheckResponse> = {}): AiFitCheckResponse => ({
@@ -47,7 +60,18 @@ const sentUserMessage = (send: ReturnType<typeof vi.fn>): string =>
 
 const fitCheckRows = async () => (await db.execute('SELECT * FROM fit_checks')).rows;
 
+const addSpecies = (name: string, toxicToCats = 0) =>
+  db.execute({
+    sql: `INSERT INTO plant_species
+      (scientific_name, common_name, aliases, watering_interval_days, drought_tolerance,
+       care_level, light_needs, toxic_to_cats, toxic_to_dogs, growth_habit, leaf_size,
+       leaf_shape, variegated, reviewed_at)
+      VALUES (?, ?, '[]', 7, 'medium', 'low', 'low', ?, 0, 'climbing', 'large', 'lobed', 0, '2026-01-01')`,
+    args: [`${name} sp.`, name, toxicToCats],
+  });
+
 beforeEach(async () => {
+  alternativesControl.fail = false;
   db = createClient({ url: ':memory:' });
   await runMigrations(db);
   for (const id of [1, 2]) {
@@ -152,6 +176,55 @@ describe('runFitCheck', () => {
       const message = sentUserMessage(send);
       expect(message).toMatch(/"name":"Monstera","catalog":\{/);
       expect(message).toContain('{"name":"Mystery cactus"}');
+    });
+  });
+
+  describe('alternatives', () => {
+    const run = (client = clientReturning(chatResult(modelAnswer())), candidateText = 'monstera') =>
+      runFitCheck({ db, client, homeId: 1, candidateText });
+
+    it('suggests look-alikes that are safe for the home’s pets, never the candidate', async () => {
+      await addSpecies('Safe vine');
+      await addSpecies('Toxic vine', 1);
+      const result = await run();
+      expect(result.status).toBe('ok');
+      if (result.status !== 'ok') return;
+      expect(result.body.alternatives).toEqual([
+        {
+          species_id: expect.any(Number),
+          common_name: 'Safe vine',
+          scientific_name: 'Safe vine sp.',
+          explanation: expect.stringContaining('Non-toxic to cats'),
+        },
+      ]);
+      expect(result.body.alternatives[0].species_id).not.toBe(result.body.species_id);
+    });
+
+    it('does not suggest species the home already owns', async () => {
+      await addSpecies('Owned vine');
+      await addSpecies('Other vine');
+      await db.execute(
+        `INSERT INTO plants (home_id, name, watering_interval_days, next_watering_date)
+         VALUES (1, 'owned vine', 7, '2026-12-01')`
+      );
+      const result = await run();
+      if (result.status !== 'ok') throw new Error('expected ok');
+      expect(result.body.alternatives.map((a) => a.common_name)).toEqual(['Other vine']);
+    });
+
+    it('is empty for a candidate missing from the catalog', async () => {
+      await addSpecies('Safe vine');
+      const result = await run(undefined, 'fiddle leaf fig');
+      if (result.status !== 'ok') throw new Error('expected ok');
+      expect(result.body.alternatives).toEqual([]);
+    });
+
+    it('does not fail the check when the alternatives lookup fails', async () => {
+      await addSpecies('Safe vine');
+      alternativesControl.fail = true;
+      const result = await run();
+      expect(result).toMatchObject({ status: 'ok', body: { alternatives: [] } });
+      expect(await fitCheckRows()).toHaveLength(1); // the paid-for answer is still logged
     });
   });
 

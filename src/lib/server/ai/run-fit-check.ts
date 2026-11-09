@@ -1,5 +1,7 @@
 import type { Client } from '@libsql/client';
 import type { OpenRouter } from '@openrouter/sdk';
+import type { HomeProfile, OwnedPlant, PlantSpecies } from '$lib/types';
+import { getAlternatives } from '../queries/alternatives';
 import { findSpeciesByName, getOwnedPlantsWithSpecies } from '../queries/catalog';
 import { getFitCheckCountByHomeAndDate } from '../queries/fit-checks';
 import { getProfile } from '../queries/profile';
@@ -15,10 +17,19 @@ export const normalizeCandidate = (raw: unknown): string | null => {
   return text || null;
 };
 
-// data_source and species_id are set here, in code, never by the model.
+// A look-alike the home could add instead, with what the "Add this plant" button needs.
+export type AlternativeBody = {
+  species_id: number;
+  common_name: string;
+  scientific_name: string;
+  explanation: string;
+};
+
+// data_source, species_id and alternatives are set here, in code, never by the model.
 export type FitCheckBody = AiFitCheckResponse & {
   data_source: 'catalog' | 'model_knowledge';
   species_id: number | null;
+  alternatives: AlternativeBody[];
 };
 
 export type RunFitCheckResult =
@@ -32,6 +43,34 @@ type RunFitCheckProps = {
   client: OpenRouter;
   homeId: number;
   candidateText: string; // already passed through normalizeCandidate
+};
+
+// Look-alikes only exist for catalog candidates: there is nothing to compare a free-text name to.
+// A failure here must not throw away a model answer that has already been paid for and logged.
+const findAlternatives = async (
+  db: Client,
+  homeProfile: HomeProfile,
+  species: PlantSpecies | null,
+  ownedPlants: OwnedPlant[]
+): Promise<AlternativeBody[]> => {
+  if (!species) return [];
+  try {
+    const alternatives = await getAlternatives({
+      db,
+      homeProfile,
+      candidate: species,
+      excludeSpeciesIds: ownedPlants.flatMap((p) => (p.species ? [p.species.id] : [])),
+    });
+    return alternatives.map((a) => ({
+      species_id: a.species.id,
+      common_name: a.species.common_name,
+      scientific_name: a.species.scientific_name,
+      explanation: a.explanation,
+    }));
+  } catch (error) {
+    console.error(`[FindAlternatives error] ${(error as Error)?.message || 'unknown error'}`);
+    return [];
+  }
 };
 
 export const runFitCheck = async ({
@@ -50,16 +89,19 @@ export const runFitCheck = async ({
     findSpeciesByName(db, candidateText),
   ]);
 
-  const result = await getAiFitCheck({
-    client,
-    db,
-    homeProfile,
-    homeNotes: homeProfile.notes,
-    ownedPlants,
-    homeId,
-    candidate: species ?? candidateText,
-    rawClientPrompt: candidateText,
-  });
+  const [result, alternatives] = await Promise.all([
+    getAiFitCheck({
+      client,
+      db,
+      homeProfile,
+      homeNotes: homeProfile.notes,
+      ownedPlants,
+      homeId,
+      candidate: species ?? candidateText,
+      rawClientPrompt: candidateText,
+    }),
+    findAlternatives(db, homeProfile, species, ownedPlants),
+  ]);
   if (!result.ok) return { status: 'failed', failure: result.failure };
 
   return {
@@ -68,6 +110,7 @@ export const runFitCheck = async ({
       ...result.response,
       data_source: species ? 'catalog' : 'model_knowledge',
       species_id: species?.id ?? null,
+      alternatives,
     },
   };
 };
