@@ -191,7 +191,7 @@ Progress markers: `[x]` done and committed, `[~]` written but uncommitted, `[ ]`
 
 **Day 4 (cont.)**
 
-- [ ] 15. Link to the check page from the dashboard. Details in §6a.
+- [x] 15. Link to the check page from the dashboard. Details in §6a.
 
 **Day 5: evals**
 

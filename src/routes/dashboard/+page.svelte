@@ -69,6 +69,9 @@
     </div>
     <nav class="header-actions">
       <a class="button primary" href={resolve('/plants/new')}>+ Add plant</a>
+      <a class="button" href={resolve('/plants/check')} aria-label="Check a plant"
+        >🔍<span class="label">Check a plant</span></a
+      >
       <a class="button" href={resolve('/settings')} aria-label="Settings"
         >⚙️<span class="label">Settings</span></a
       >
