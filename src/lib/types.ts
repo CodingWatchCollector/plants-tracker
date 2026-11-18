@@ -71,3 +71,34 @@ export interface OwnedPlant {
 }
 
 export type PlantFormData = Omit<Plant, 'id' | 'home_id' | 'created_at' | 'updated_at'>;
+
+export type FitCheckVerdict = 'good_fit' | 'caution' | 'poor_fit';
+
+export interface FitCheckReason {
+  factor: 'care' | 'pets' | 'kids' | 'light' | 'travel' | 'other';
+  detail: string;
+}
+
+// What the model returns (validated by the Zod schema in $lib/server/ai/fit-check).
+export interface FitCheckResponse {
+  verdict: FitCheckVerdict;
+  summary: string;
+  reasons: FitCheckReason[];
+  warnings: string[];
+  identified_as: string | null;
+}
+
+// A look-alike the home could add instead, with what the "Add this plant" button needs.
+export interface AlternativeBody {
+  species_id: number;
+  common_name: string;
+  scientific_name: string;
+  explanation: string;
+}
+
+// The /api/fit-check response. data_source, species_id and alternatives are set in code, never by the model.
+export type FitCheckBody = FitCheckResponse & {
+  data_source: 'catalog' | 'model_knowledge';
+  species_id: number | null;
+  alternatives: AlternativeBody[];
+};

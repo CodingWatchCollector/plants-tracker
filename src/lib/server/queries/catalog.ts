@@ -51,6 +51,14 @@ export async function findSpeciesByName(db: Client, text: string): Promise<Plant
   return rows[0] ? rowToSpecies(rows[0]) : null;
 }
 
+export async function getSpeciesById(db: Client, id: number): Promise<PlantSpecies | null> {
+  const { rows } = await db.execute({
+    sql: 'SELECT * FROM plant_species WHERE id = ?',
+    args: [id],
+  });
+  return rows[0] ? rowToSpecies(rows[0]) : null;
+}
+
 // Autocomplete: species whose scientific name, common name or an alias contains the text.
 // Names that start with the text come first.
 export async function searchSpecies(db: Client, text: string, limit = 8): Promise<PlantSpecies[]> {

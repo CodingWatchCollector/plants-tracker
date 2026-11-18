@@ -1,9 +1,7 @@
-import { OpenRouter } from '@openrouter/sdk';
+import type { OpenRouter } from '@openrouter/sdk';
 import z from 'zod';
-import { FIT_CHECK_SYSTEM_PROMPT, PROMPT_VERSION } from './fit-check-prompt';
-import type { HomeProfile, OwnedPlant, PlantSpecies } from '$lib/types';
-import type { Client } from '@libsql/client';
-import { logFitCheck } from '../queries/fit-checks';
+import { FIT_CHECK_SYSTEM_PROMPT } from './fit-check-prompt';
+import type { FitCheckResponse, HomeProfile, OwnedPlant, PlantSpecies } from '$lib/types';
 
 const schema = z.object({
   verdict: z.enum(['good_fit', 'caution', 'poor_fit']),
@@ -16,62 +14,82 @@ const schema = z.object({
   ),
   warnings: z.array(z.string()),
   identified_as: z.string().nullable(),
-});
-export type AiFitCheckResponse = z.infer<typeof schema>;
+}) satisfies z.ZodType<FitCheckResponse>;
+// The other direction: the plain type must not allow anything the schema rejects.
+const _plainTypeMatchesSchema = (r: FitCheckResponse): z.infer<typeof schema> => r;
+void _plainTypeMatchesSchema;
+
+export const DEFAULT_FIT_CHECK_MODEL = 'anthropic/claude-haiku-4.5';
 
 // refused: the model declined. invalid_response: truncated, empty, or not matching the schema.
 // provider_error: the request itself failed (network, routing, rate limit, bad key).
 export type FitCheckFailure = 'refused' | 'invalid_response' | 'provider_error';
-export type FitCheckResult =
-  | { ok: true; response: AiFitCheckResponse }
-  | { ok: false; failure: FitCheckFailure };
+
+export type FitCheckUsage = {
+  inputTokens: number | null;
+  outputTokens: number | null;
+  latencyMs: number;
+};
+
+export type FitCheckOutcome =
+  | {
+      ok: true;
+      response: FitCheckResponse; // after the guardrail
+      rawResponse: FitCheckResponse; // as the model returned it, before the guardrail
+      guardrailFired: boolean;
+      usage: FitCheckUsage;
+    }
+  | {
+      ok: false;
+      failure: FitCheckFailure;
+      detail: string; // the error message; for invalid content include up to 1000 chars of it
+      usage: FitCheckUsage | null; // null only for provider_error (no response came back)
+    };
+
+type TokenCounts = Pick<FitCheckUsage, 'inputTokens' | 'outputTokens'>;
 
 class FitCheckError extends Error {
   constructor(
     readonly failure: FitCheckFailure,
-    message: string
+    message: string,
+    readonly tokens?: TokenCounts
   ) {
     super(message);
   }
 }
 
-type GetAiFitCheckProps = {
+type EvaluateFitCheckProps = {
   client: OpenRouter;
-  db: Client;
+  model: string;
   homeProfile: HomeProfile;
-  homeNotes: string;
   ownedPlants: OwnedPlant[];
-  homeId: number;
   candidate: PlantSpecies | string;
-  rawClientPrompt: string;
 };
-const MODEL = 'anthropic/claude-haiku-4.5';
 
-export const getAiFitCheck = ({
+const MAX_DETAIL_CONTENT = 1000;
+
+export const evaluateFitCheck = async ({
   client,
-  db,
+  model,
   homeProfile,
-  homeNotes,
   ownedPlants,
-  homeId,
   candidate,
-  rawClientPrompt,
-}: GetAiFitCheckProps): Promise<FitCheckResult> => {
+}: EvaluateFitCheckProps): Promise<FitCheckOutcome> => {
   const startTime = performance.now();
-  return client.chat
-    .send({
+  const usageOf = (tokens?: TokenCounts): FitCheckUsage => ({
+    inputTokens: tokens?.inputTokens ?? null,
+    outputTokens: tokens?.outputTokens ?? null,
+    latencyMs: Math.round(performance.now() - startTime),
+  });
+  try {
+    const res = await client.chat.send({
       chatRequest: {
-        model: MODEL,
+        model,
         messages: [
           { role: 'system', content: FIT_CHECK_SYSTEM_PROMPT },
           {
             role: 'user',
-            content: getFitCheckMessage({
-              homeProfile,
-              homeNotes,
-              ownedPlants,
-              candidate,
-            }),
+            content: getFitCheckMessage({ homeProfile, ownedPlants, candidate }),
           },
         ],
         responseFormat: {
@@ -86,58 +104,63 @@ export const getAiFitCheck = ({
           requireParameters: true,
         },
       },
-    })
-    .then((res) => {
-      if (res instanceof ReadableStream) {
-        throw new FitCheckError('provider_error', 'unexpected streaming response');
-      }
-      const rawResponse = res.choices[0];
-      const finishReason = rawResponse.finishReason;
-      if (finishReason !== 'stop') {
-        console.log({ finishReason });
-        throw new FitCheckError('invalid_response', `unexpected finishReason: ${finishReason}`);
-      }
-      if (rawResponse.message.refusal) {
-        console.log({ refusal: rawResponse.message.refusal });
-        throw new FitCheckError('refused', 'received refusal message');
-      }
-      const content = rawResponse.message.content;
-      if (typeof content !== 'string') {
-        console.log({ content });
-        throw new FitCheckError('invalid_response', 'wrong content type');
-      }
-      const parsed = schema.safeParse(parseJson(content));
-      if (!parsed.success) {
-        throw new FitCheckError('invalid_response', `schema mismatch: ${parsed.error.message}`);
-      }
-      const parsedResponse = parsed.data;
-      const guardrailedResponse = applyFitCheckGuardrail({
-        response: parsedResponse,
-        candidate,
-        homeProfile,
-      });
-      return logFitCheck({
-        db,
-        homeId,
-        candidateText: rawClientPrompt,
-        speciesId: typeof candidate === 'string' ? null : candidate.id,
-        verdict: guardrailedResponse.response.verdict,
-        responseJson: JSON.stringify(guardrailedResponse.response),
-        model: MODEL,
-        promptVersion: PROMPT_VERSION,
-        inputTokens: res.usage?.promptTokens,
-        outputTokens: res.usage?.completionTokens,
-        latencyMs: Math.round(performance.now() - startTime),
-        guardrailFired: guardrailedResponse.guardrailFired,
-      }).then((): FitCheckResult => ({ ok: true, response: guardrailedResponse.response }));
-    })
-    .catch((error): FitCheckResult => {
-      console.error(`[GetAiFitCheck error] ${error?.message || 'unknown error'}`);
+    });
+    if (res instanceof ReadableStream) {
+      throw new FitCheckError('provider_error', 'unexpected streaming response');
+    }
+    const tokens: TokenCounts = {
+      inputTokens: res.usage?.promptTokens ?? null,
+      outputTokens: res.usage?.completionTokens ?? null,
+    };
+    const choice = res.choices[0];
+    const finishReason = choice.finishReason;
+    if (finishReason !== 'stop') {
+      throw new FitCheckError(
+        'invalid_response',
+        `unexpected finishReason: ${finishReason}`,
+        tokens
+      );
+    }
+    if (choice.message.refusal) {
+      throw new FitCheckError('refused', 'received refusal message', tokens);
+    }
+    const content = choice.message.content;
+    if (typeof content !== 'string') {
+      throw new FitCheckError('invalid_response', 'wrong content type', tokens);
+    }
+    const parsed = schema.safeParse(parseJson(content));
+    if (!parsed.success) {
+      throw new FitCheckError(
+        'invalid_response',
+        `schema mismatch: ${parsed.error.message}\ncontent: ${content.slice(0, MAX_DETAIL_CONTENT)}`,
+        tokens
+      );
+    }
+    const guardrailed = applyFitCheckGuardrail({
+      response: parsed.data,
+      candidate,
+      homeProfile,
+    });
+    return {
+      ok: true,
+      response: guardrailed.response,
+      rawResponse: parsed.data,
+      guardrailFired: guardrailed.guardrailFired,
+      usage: usageOf(tokens),
+    };
+  } catch (error) {
+    const message = (error as Error)?.message || 'unknown error';
+    console.error(`[EvaluateFitCheck error] ${message}`);
+    if (error instanceof FitCheckError) {
       return {
         ok: false,
-        failure: error instanceof FitCheckError ? error.failure : 'provider_error',
+        failure: error.failure,
+        detail: message,
+        usage: error.tokens ? usageOf(error.tokens) : null,
       };
-    });
+    }
+    return { ok: false, failure: 'provider_error', detail: message, usage: null };
+  }
 };
 
 const parseJson = (text: string): unknown => {
@@ -165,16 +188,11 @@ const catalogFacts = (s: PlantSpecies) => ({
 });
 
 type FitCheckMessageProps = Pick<
-  GetAiFitCheckProps,
-  'homeProfile' | 'homeNotes' | 'ownedPlants' | 'candidate'
+  EvaluateFitCheckProps,
+  'homeProfile' | 'ownedPlants' | 'candidate'
 >;
-const getFitCheckMessage = ({
-  homeProfile,
-  homeNotes,
-  ownedPlants,
-  candidate,
-}: FitCheckMessageProps) => {
-  const { home_id: _homeId, updated_at: _updatedAt, notes: _notes, ...profile } = homeProfile;
+const getFitCheckMessage = ({ homeProfile, ownedPlants, candidate }: FitCheckMessageProps) => {
+  const { home_id: _homeId, updated_at: _updatedAt, notes: homeNotes, ...profile } = homeProfile;
   const owned = ownedPlants.length
     ? ownedPlants
         .map((p) =>
@@ -203,7 +221,7 @@ ${candidateBlock}`;
 };
 
 type ApplyFitCheckGuardrailProps = {
-  response: AiFitCheckResponse;
+  response: FitCheckResponse;
   candidate: PlantSpecies | string;
   homeProfile: HomeProfile;
 };
@@ -212,20 +230,24 @@ const PET_WORDS = {
   cats: /\b(cats?|kittens?|felines?|pets?)\b/i,
   dogs: /\b(dogs?|puppy|puppies|canines?|pets?)\b/i,
 };
+const KID_WORDS = /\b(child|children|kids?|toddlers?|bab(y|ies)|people|humans?)\b/i;
 const TOXIC_WARNING = /\b(toxic|poisonous)\b/i;
-const NEGATED_WARNING = /\b(non-toxic|nontoxic|not toxic|not poisonous|safe)\b/i;
+const NEGATED_WARNING = /\b(non-?toxic|not toxic|not poisonous)\b/i;
 
-const warnsAboutPet = (warnings: string[], pet: keyof typeof PET_WORDS) =>
-  warnings.some((w) => TOXIC_WARNING.test(w) && !NEGATED_WARNING.test(w) && PET_WORDS[pet].test(w));
+const warnsAbout = (warnings: string[], words: RegExp) =>
+  warnings.some((w) => TOXIC_WARNING.test(w) && !NEGATED_WARNING.test(w) && words.test(w));
 
-// Applies only when the catalog says the candidate is toxic to a pet the home has.
-// Then the verdict can't be good_fit and a toxicity warning for that pet must be present.
+// Applies only to catalog candidates, with two rules:
+//   - pets: toxic to a pet the home has, so the verdict can't be good_fit and a toxicity warning
+//     for that pet must be present;
+//   - small kids: toxic to cats or dogs (ASPCA pet toxicity as a proxy for "not safe around small
+//     kids"), so a toxicity warning mentioning children must be present. The verdict is not forced.
 // guardrailFired is true only when this changed the output. Does not mutate its input.
 export const applyFitCheckGuardrail = ({
   response,
   candidate,
   homeProfile,
-}: ApplyFitCheckGuardrailProps): { response: AiFitCheckResponse; guardrailFired: boolean } => {
+}: ApplyFitCheckGuardrailProps): { response: FitCheckResponse; guardrailFired: boolean } => {
   if (typeof candidate === 'string') {
     return { response, guardrailFired: false };
   }
@@ -234,8 +256,13 @@ export const applyFitCheckGuardrail = ({
   if (homeProfile.has_dogs && candidate.toxic_to_dogs) exposedPets.push('dogs');
 
   const missingWarnings = exposedPets
-    .filter((pet) => !warnsAboutPet(response.warnings, pet))
+    .filter((pet) => !warnsAbout(response.warnings, PET_WORDS[pet]))
     .map((pet) => `Toxic to ${pet} if ingested.`);
+  const exposedKids =
+    homeProfile.has_small_kids && (candidate.toxic_to_cats || candidate.toxic_to_dogs);
+  if (exposedKids && !warnsAbout(response.warnings, KID_WORDS)) {
+    missingWarnings.push('Toxic if eaten; keep out of reach of small children.');
+  }
   const verdict =
     exposedPets.length && response.verdict === 'good_fit' ? 'poor_fit' : response.verdict;
 

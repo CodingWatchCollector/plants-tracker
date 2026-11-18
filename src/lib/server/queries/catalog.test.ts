@@ -1,7 +1,12 @@
 import { createClient, type Client } from '@libsql/client';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { runMigrations } from '../migrate';
-import { findSpeciesByName, getOwnedPlantsWithSpecies, searchSpecies } from './catalog';
+import {
+  findSpeciesByName,
+  getOwnedPlantsWithSpecies,
+  getSpeciesById,
+  searchSpecies,
+} from './catalog';
 
 let db: Client;
 
@@ -145,5 +150,22 @@ describe('getOwnedPlantsWithSpecies', () => {
     const owned = await getOwnedPlantsWithSpecies(db, 1);
     expect(owned).toHaveLength(1);
     expect(owned[0].species?.scientific_name).toBe('Monstera deliciosa'); // lowest id wins
+  });
+});
+
+describe('getSpeciesById', () => {
+  it('returns the species with that id', async () => {
+    const pothos = await findSpeciesByName(db, 'pothos');
+    const species = await getSpeciesById(db, pothos!.id);
+    expect(species).toMatchObject({
+      id: pothos!.id,
+      common_name: 'Pothos',
+      scientific_name: 'Epipremnum aureum',
+      watering_interval_days: 7,
+    });
+  });
+
+  it('returns null for an id that does not exist', async () => {
+    expect(await getSpeciesById(db, 9999)).toBeNull();
   });
 });

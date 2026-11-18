@@ -10,7 +10,7 @@ export interface Alternative {
 
 type AlternativesHome = Pick<
   HomeProfile,
-  'has_cats' | 'has_dogs' | 'care_commitment' | 'typical_light' | 'travels_often'
+  'has_cats' | 'has_dogs' | 'has_small_kids' | 'care_commitment' | 'typical_light' | 'travels_often'
 >;
 
 type GetAlternativesProps = {
@@ -21,6 +21,10 @@ type GetAlternativesProps = {
   excludeSpeciesIds?: number[];
   limit?: number;
 };
+
+// Alternatives scoring below this are not returned: 3 is the same growth habit, or two of the
+// smaller traits matching. Fewer than `limit` results, or none, is fine.
+export const MIN_SIMILARITY = 3;
 
 export const SIMILARITY_WEIGHTS = {
   growth_habit: 3,
@@ -42,10 +46,14 @@ const placeholders = (values: unknown[]) => values.map(() => '?').join(', ');
 // so an unsafe or unsuitable plant can never come back, whatever the similarity score says:
 //   - not the candidate itself, not already owned
 //   - not toxic to a pet the home has
+//   - not toxic to cats or dogs when the home has small kids. This uses ASPCA pet toxicity as a
+//     proxy for "not safe around small kids": the catalog has no human-toxicity column, and the
+//     common houseplant toxins (calcium oxalate, saponins) affect people too.
 //   - care_level no higher than the household's care_commitment
 //   - light_needs no higher than the home's typical_light
 //   - drought_tolerance not 'low' when the home travels often
-// Highest similarity first; ties are broken by common name so the order is stable.
+// Only plants scoring at least MIN_SIMILARITY come back, highest similarity first; ties are broken
+// by common name so the order is stable.
 export const getAlternatives = async ({
   db,
   homeProfile,
@@ -64,18 +72,23 @@ export const getAlternatives = async ({
     `ps.light_needs IN (${placeholders(lightLevels)})`,
     `ps.drought_tolerance IN (${placeholders(droughtLevels)})`,
   ];
-  if (homeProfile.has_cats) where.push('ps.toxic_to_cats = 0');
-  if (homeProfile.has_dogs) where.push('ps.toxic_to_dogs = 0');
+  // One condition per column, even when the home has both pets and kids.
+  if (homeProfile.has_cats || homeProfile.has_small_kids) where.push('ps.toxic_to_cats = 0');
+  if (homeProfile.has_dogs || homeProfile.has_small_kids) where.push('ps.toxic_to_dogs = 0');
 
   const { rows } = await db.execute({
-    sql: `SELECT ps.*,
-            (ps.growth_habit = ?) * ${SIMILARITY_WEIGHTS.growth_habit}
-            + (ps.leaf_size = ?) * ${SIMILARITY_WEIGHTS.leaf_size}
-            + (LOWER(ps.leaf_shape) = LOWER(?)) * ${SIMILARITY_WEIGHTS.leaf_shape}
-            + (ps.variegated = ?) * ${SIMILARITY_WEIGHTS.variegated} AS similarity
-          FROM plant_species ps
-          WHERE ${where.join(' AND ')}
-          ORDER BY similarity DESC, ps.common_name ASC
+    // SQLite can't filter on a SELECT alias portably, so the scoring query is wrapped.
+    sql: `SELECT * FROM (
+            SELECT ps.*,
+              (ps.growth_habit = ?) * ${SIMILARITY_WEIGHTS.growth_habit}
+              + (ps.leaf_size = ?) * ${SIMILARITY_WEIGHTS.leaf_size}
+              + (LOWER(ps.leaf_shape) = LOWER(?)) * ${SIMILARITY_WEIGHTS.leaf_shape}
+              + (ps.variegated = ?) * ${SIMILARITY_WEIGHTS.variegated} AS similarity
+            FROM plant_species ps
+            WHERE ${where.join(' AND ')}
+          )
+          WHERE similarity >= ?
+          ORDER BY similarity DESC, common_name ASC
           LIMIT ?`,
     args: [
       candidate.growth_habit,
@@ -86,6 +99,7 @@ export const getAlternatives = async ({
       ...careLevels,
       ...lightLevels,
       ...droughtLevels,
+      MIN_SIMILARITY,
       limit,
     ],
   });
@@ -114,12 +128,15 @@ export const explainAlternative = (
   }
   if (species.variegated && candidate.variegated) alike.push('variegated leaves');
 
-  const look = alike.length
-    ? `Similar look to ${candidate.common_name}: ${alike.join(', ')}.`
-    : `Looks different from ${candidate.common_name}, but suits your home.`;
+  // MIN_SIMILARITY guarantees at least one of habit, leaf size or leaf shape matches.
+  const look = `Similar look to ${candidate.common_name}: ${alike.join(', ')}.`;
 
   const pets = [homeProfile.has_cats && 'cats', homeProfile.has_dogs && 'dogs'].filter(Boolean);
-  const safety = pets.length ? ` Non-toxic to ${pets.join(' and ')}.` : '';
+  const safety = pets.length
+    ? ` Non-toxic to ${pets.join(' and ')}.`
+    : homeProfile.has_small_kids
+      ? ' Listed non-toxic by the ASPCA.'
+      : '';
 
   return `${look}${safety} ${capitalize(species.care_level)} care.`;
 };

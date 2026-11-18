@@ -14,7 +14,6 @@
     "format": "prettier --write .",
     "db:migrate": "node --env-file=.env.develop scripts/migrate.ts",
     "db:seed": "tsx --env-file .env.develop scripts/seed-catalog.ts",
-    "ai-test": "node src/lib/server/ai/client-check.ts",
     "test": "vitest run"
   },
   "devDependencies": {

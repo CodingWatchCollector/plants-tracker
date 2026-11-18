@@ -1,11 +1,18 @@
 import type { Client } from '@libsql/client';
 import type { OpenRouter } from '@openrouter/sdk';
-import type { HomeProfile, OwnedPlant, PlantSpecies } from '$lib/types';
+import type {
+  AlternativeBody,
+  FitCheckBody,
+  HomeProfile,
+  OwnedPlant,
+  PlantSpecies,
+} from '$lib/types';
 import { getAlternatives } from '../queries/alternatives';
 import { findSpeciesByName, getOwnedPlantsWithSpecies } from '../queries/catalog';
-import { getFitCheckCountByHomeAndDate } from '../queries/fit-checks';
+import { getFitCheckCountByHomeAndDate, logFitCheck } from '../queries/fit-checks';
 import { getProfile } from '../queries/profile';
-import { getAiFitCheck, type AiFitCheckResponse, type FitCheckFailure } from './fit-check';
+import { DEFAULT_FIT_CHECK_MODEL, evaluateFitCheck, type FitCheckFailure } from './fit-check';
+import { PROMPT_VERSION } from './fit-check-prompt';
 
 export const DAILY_FIT_CHECK_LIMIT = 20;
 export const MAX_CANDIDATE_LENGTH = 100;
@@ -15,21 +22,6 @@ export const normalizeCandidate = (raw: unknown): string | null => {
   if (typeof raw !== 'string') return null;
   const text = raw.trim().slice(0, MAX_CANDIDATE_LENGTH).trim();
   return text || null;
-};
-
-// A look-alike the home could add instead, with what the "Add this plant" button needs.
-export type AlternativeBody = {
-  species_id: number;
-  common_name: string;
-  scientific_name: string;
-  explanation: string;
-};
-
-// data_source, species_id and alternatives are set here, in code, never by the model.
-export type FitCheckBody = AiFitCheckResponse & {
-  data_source: 'catalog' | 'model_knowledge';
-  species_id: number | null;
-  alternatives: AlternativeBody[];
 };
 
 export type RunFitCheckResult =
@@ -89,25 +81,43 @@ export const runFitCheck = async ({
     findSpeciesByName(db, candidateText),
   ]);
 
-  const [result, alternatives] = await Promise.all([
-    getAiFitCheck({
+  const [outcome, alternatives] = await Promise.all([
+    evaluateFitCheck({
       client,
-      db,
+      model: DEFAULT_FIT_CHECK_MODEL,
       homeProfile,
-      homeNotes: homeProfile.notes,
       ownedPlants,
-      homeId,
       candidate: species ?? candidateText,
-      rawClientPrompt: candidateText,
     }),
     findAlternatives(db, homeProfile, species, ownedPlants),
   ]);
-  if (!result.ok) return { status: 'failed', failure: result.failure };
+  // refused and invalid answers were already paid for, so they are logged (and count toward the
+  // quota). provider_error is not: no answer came back and an outage shouldn't use up a quota.
+  if (!outcome.ok && outcome.failure === 'provider_error') {
+    return { status: 'failed', failure: outcome.failure };
+  }
+  await logFitCheck({
+    db,
+    homeId,
+    candidateText,
+    speciesId: species?.id ?? null,
+    verdict: outcome.ok ? outcome.response.verdict : 'error',
+    responseJson: JSON.stringify(
+      outcome.ok ? outcome.response : { failure: outcome.failure, detail: outcome.detail }
+    ),
+    model: DEFAULT_FIT_CHECK_MODEL,
+    promptVersion: PROMPT_VERSION,
+    inputTokens: outcome.usage?.inputTokens,
+    outputTokens: outcome.usage?.outputTokens,
+    latencyMs: outcome.usage?.latencyMs ?? 0,
+    guardrailFired: outcome.ok && outcome.guardrailFired,
+  });
+  if (!outcome.ok) return { status: 'failed', failure: outcome.failure };
 
   return {
     status: 'ok',
     body: {
-      ...result.response,
+      ...outcome.response,
       data_source: species ? 'catalog' : 'model_knowledge',
       species_id: species?.id ?? null,
       alternatives,

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
-  import type { FitCheckBody } from '$lib/server/ai/run-fit-check';
+  import type { FitCheckBody } from '$lib/types';
 
   let { name, result }: { name: string; result: FitCheckBody } = $props();
 

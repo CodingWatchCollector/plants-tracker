@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { HomeProfile, PlantSpecies } from '$lib/types';
 import { runMigrations } from '../migrate';
 import { findSpeciesByName } from './catalog';
-import { getAlternatives, SIMILARITY_WEIGHTS } from './alternatives';
+import { getAlternatives, MIN_SIMILARITY, SIMILARITY_WEIGHTS } from './alternatives';
 
 let db: Client;
 
@@ -59,9 +59,15 @@ const addSpecies = async (name: string, row: Row = {}) => {
   return (await findSpeciesByName(db, name))!;
 };
 
+// A plant that looks enough like the candidate (same growth habit, 3 points) to clear
+// MIN_SIMILARITY, so a test about a hard filter or the order isn't hidden by the similarity cut.
+const addLookAlike = (name: string, row: Row = {}) =>
+  addSpecies(name, { growth_habit: 'trailing', ...row });
+
 const home = (overrides: Partial<HomeProfile> = {}) => ({
   has_cats: false,
   has_dogs: false,
+  has_small_kids: false,
   care_commitment: 'high' as const,
   typical_light: 'bright' as const,
   travels_often: false,
@@ -90,8 +96,8 @@ beforeEach(async () => {
 
 describe('getAlternatives: hard filters', () => {
   it('never returns the candidate itself, nor species the home already owns', async () => {
-    const owned = await addSpecies('Owned');
-    await addSpecies('Free');
+    const owned = await addLookAlike('Owned');
+    await addLookAlike('Free');
     const result = await getAlternatives({
       db,
       homeProfile: home(),
@@ -105,9 +111,9 @@ describe('getAlternatives: hard filters', () => {
     ['cats', { has_cats: true }, 'Toxic to cats'],
     ['dogs', { has_dogs: true }, 'Toxic to dogs'],
   ])('excludes plants toxic to the home’s %s', async (_pet, profile, toxicName) => {
-    await addSpecies('Toxic to cats', { toxic_to_cats: true });
-    await addSpecies('Toxic to dogs', { toxic_to_dogs: true });
-    await addSpecies('Safe');
+    await addLookAlike('Toxic to cats', { toxic_to_cats: true });
+    await addLookAlike('Toxic to dogs', { toxic_to_dogs: true });
+    await addLookAlike('Safe');
     const result = names(await getAlternatives({ db, homeProfile: home(profile), candidate }));
     expect(result).toContain('Safe');
     expect(result).not.toContain(toxicName);
@@ -115,9 +121,9 @@ describe('getAlternatives: hard filters', () => {
   });
 
   it('excludes anything toxic to either pet when the home has both', async () => {
-    await addSpecies('Toxic to cats', { toxic_to_cats: true });
-    await addSpecies('Toxic to dogs', { toxic_to_dogs: true });
-    await addSpecies('Safe');
+    await addLookAlike('Toxic to cats', { toxic_to_cats: true });
+    await addLookAlike('Toxic to dogs', { toxic_to_dogs: true });
+    await addLookAlike('Safe');
     const result = await getAlternatives({
       db,
       homeProfile: home({ has_cats: true, has_dogs: true }),
@@ -126,8 +132,20 @@ describe('getAlternatives: hard filters', () => {
     expect(names(result)).toEqual(['Safe']);
   });
 
+  it('excludes anything toxic to cats or dogs when the home has small kids but no pets', async () => {
+    await addLookAlike('Toxic to cats', { toxic_to_cats: true });
+    await addLookAlike('Toxic to dogs', { toxic_to_dogs: true });
+    await addLookAlike('Safe');
+    const result = await getAlternatives({
+      db,
+      homeProfile: home({ has_small_kids: true }),
+      candidate,
+    });
+    expect(names(result)).toEqual(['Safe']);
+  });
+
   it('allows toxic plants when the home has no pets', async () => {
-    await addSpecies('Toxic to cats', { toxic_to_cats: true });
+    await addLookAlike('Toxic to cats', { toxic_to_cats: true });
     const result = await getAlternatives({ db, homeProfile: home(), candidate });
     expect(names(result)).toEqual(['Toxic to cats']);
   });
@@ -139,9 +157,9 @@ describe('getAlternatives: hard filters', () => {
   ] as const)(
     'care_commitment %s allows only plants needing that care or less',
     async (level, expected) => {
-      await addSpecies('Low care', { care_level: 'low' });
-      await addSpecies('Medium care', { care_level: 'medium' });
-      await addSpecies('High care', { care_level: 'high' });
+      await addLookAlike('Low care', { care_level: 'low' });
+      await addLookAlike('Medium care', { care_level: 'medium' });
+      await addLookAlike('High care', { care_level: 'high' });
       const result = await getAlternatives({
         db,
         homeProfile: home({ care_commitment: level }),
@@ -158,9 +176,9 @@ describe('getAlternatives: hard filters', () => {
   ] as const)(
     'typical_light %s allows only plants needing that light or less',
     async (light, expected) => {
-      await addSpecies('Low light', { light_needs: 'low' });
-      await addSpecies('Medium light', { light_needs: 'medium' });
-      await addSpecies('Bright light', { light_needs: 'bright' });
+      await addLookAlike('Low light', { light_needs: 'low' });
+      await addLookAlike('Medium light', { light_needs: 'medium' });
+      await addLookAlike('Bright light', { light_needs: 'bright' });
       const result = await getAlternatives({
         db,
         homeProfile: home({ typical_light: light }),
@@ -171,9 +189,9 @@ describe('getAlternatives: hard filters', () => {
   );
 
   it('excludes low drought tolerance plants when the home travels often', async () => {
-    await addSpecies('Thirsty', { drought_tolerance: 'low' });
-    await addSpecies('Medium drought', { drought_tolerance: 'medium' });
-    await addSpecies('Hardy', { drought_tolerance: 'high' });
+    await addLookAlike('Thirsty', { drought_tolerance: 'low' });
+    await addLookAlike('Medium drought', { drought_tolerance: 'medium' });
+    await addLookAlike('Hardy', { drought_tolerance: 'high' });
     const travelling = await getAlternatives({
       db,
       homeProfile: home({ travels_often: true }),
@@ -200,49 +218,51 @@ describe('getAlternatives: hard filters', () => {
                 drought_tolerance,
                 toxic_to_cats,
                 toxic_to_dogs,
-                // varying looks so similarity cannot be what keeps results safe
-                growth_habit: n % 2 ? 'trailing' : 'upright',
+                // varying looks, all above MIN_SIMILARITY, so similarity cannot be what keeps results safe
+                growth_habit: 'trailing',
                 leaf_size: n % 3 ? 'large' : 'small',
               });
 
     let checked = 0;
     for (const has_cats of [false, true])
       for (const has_dogs of [false, true])
-        for (const care_commitment of traits)
-          for (const typical_light of light)
-            for (const travels_often of [false, true]) {
-              const profile = home({
-                has_cats,
-                has_dogs,
-                care_commitment,
-                typical_light,
-                travels_often,
-              });
-              const result = await getAlternatives({
-                db,
-                homeProfile: profile,
-                candidate,
-                limit: 200,
-              });
-              for (const { species } of result) {
-                checked++;
-                expect(species.id).not.toBe(candidate.id);
-                if (has_cats) expect(species.toxic_to_cats).toBe(false);
-                if (has_dogs) expect(species.toxic_to_dogs).toBe(false);
-                expect(traits.indexOf(species.care_level)).toBeLessThanOrEqual(
-                  traits.indexOf(care_commitment)
-                );
-                expect(light.indexOf(species.light_needs)).toBeLessThanOrEqual(
-                  light.indexOf(typical_light)
-                );
-                if (travels_often) expect(species.drought_tolerance).not.toBe('low');
+        for (const has_small_kids of [false, true])
+          for (const care_commitment of traits)
+            for (const typical_light of light)
+              for (const travels_often of [false, true]) {
+                const profile = home({
+                  has_cats,
+                  has_dogs,
+                  has_small_kids,
+                  care_commitment,
+                  typical_light,
+                  travels_often,
+                });
+                const result = await getAlternatives({
+                  db,
+                  homeProfile: profile,
+                  candidate,
+                  limit: 200,
+                });
+                for (const { species } of result) {
+                  checked++;
+                  expect(species.id).not.toBe(candidate.id);
+                  if (has_cats || has_small_kids) expect(species.toxic_to_cats).toBe(false);
+                  if (has_dogs || has_small_kids) expect(species.toxic_to_dogs).toBe(false);
+                  expect(traits.indexOf(species.care_level)).toBeLessThanOrEqual(
+                    traits.indexOf(care_commitment)
+                  );
+                  expect(light.indexOf(species.light_needs)).toBeLessThanOrEqual(
+                    light.indexOf(typical_light)
+                  );
+                  if (travels_often) expect(species.drought_tolerance).not.toBe('low');
+                }
               }
-            }
     expect(checked).toBeGreaterThan(1000); // the loop really exercised many results
   });
 
   it('returns an empty list when nothing passes', async () => {
-    await addSpecies('Needs care', { care_level: 'high' });
+    await addLookAlike('Needs care', { care_level: 'high' });
     const result = await getAlternatives({
       db,
       homeProfile: home({ care_commitment: 'low' }),
@@ -254,11 +274,14 @@ describe('getAlternatives: hard filters', () => {
 
 describe('getAlternatives: similarity and order', () => {
   it('weighs habit 3, leaf size 2, leaf shape 2, variegation 1 against the candidate', async () => {
-    await addSpecies('None', {});
     await addSpecies('Habit', { growth_habit: 'trailing' });
-    await addSpecies('Size', { leaf_size: 'large' });
-    await addSpecies('Shape', { leaf_shape: 'HEART' }); // case-insensitive
-    await addSpecies('Variegated', { variegated: true });
+    await addSpecies('Size and shape', { leaf_size: 'large', leaf_shape: 'HEART' }); // case-insensitive
+    await addSpecies('Habit and variegated', { growth_habit: 'trailing', variegated: true });
+    await addSpecies('Size, shape, variegated', {
+      leaf_size: 'large',
+      leaf_shape: 'heart',
+      variegated: true,
+    });
     await addSpecies('All', {
       growth_habit: 'trailing',
       leaf_size: 'large',
@@ -268,30 +291,48 @@ describe('getAlternatives: similarity and order', () => {
     const result = await getAlternatives({ db, homeProfile: home(), candidate, limit: 10 });
     const score = Object.fromEntries(result.map((a) => [a.species.common_name, a.similarity]));
     expect(score).toEqual({
-      None: 0,
-      Habit: SIMILARITY_WEIGHTS.growth_habit,
-      Size: SIMILARITY_WEIGHTS.leaf_size,
-      Shape: SIMILARITY_WEIGHTS.leaf_shape,
-      Variegated: SIMILARITY_WEIGHTS.variegated,
-      All: 8,
+      'Habit': SIMILARITY_WEIGHTS.growth_habit,
+      'Size and shape': SIMILARITY_WEIGHTS.leaf_size + SIMILARITY_WEIGHTS.leaf_shape,
+      'Habit and variegated': SIMILARITY_WEIGHTS.growth_habit + SIMILARITY_WEIGHTS.variegated,
+      'Size, shape, variegated': 5,
+      'All': 8,
     });
+  });
+
+  it(`never returns a plant that passes every hard filter but scores below ${MIN_SIMILARITY}`, async () => {
+    await addSpecies('None'); // 0
+    await addSpecies('Size', { leaf_size: 'large' }); // 2
+    await addSpecies('Shape', { leaf_shape: 'heart' }); // 2
+    await addSpecies('Variegated', { variegated: true }); // 1
+    await addSpecies('Habit', { growth_habit: 'trailing' }); // 3, exactly the minimum
+    const result = await getAlternatives({ db, homeProfile: home(), candidate, limit: 10 });
+    expect(names(result)).toEqual(['Habit']);
+    expect(result.every((a) => a.similarity >= MIN_SIMILARITY)).toBe(true);
   });
 
   it('orders by similarity, then alphabetically', async () => {
     await addSpecies('Zebra', { growth_habit: 'trailing' }); // 3
     await addSpecies('Apple', { growth_habit: 'trailing' }); // 3
     await addSpecies('Mid', { leaf_size: 'large', leaf_shape: 'heart' }); // 4
-    await addSpecies('Low', { variegated: true }); // 1
+    await addSpecies('Low', { variegated: true }); // 1, below the minimum
     const result = await getAlternatives({ db, homeProfile: home(), candidate, limit: 10 });
-    expect(names(result)).toEqual(['Mid', 'Apple', 'Zebra', 'Low']);
+    expect(names(result)).toEqual(['Mid', 'Apple', 'Zebra']);
   });
 
   it('returns the top 3 by default and honours a custom limit', async () => {
-    for (let i = 0; i < 12; i++) await addSpecies(`Plant ${String(i).padStart(2, '0')}`);
+    for (let i = 0; i < 12; i++) await addLookAlike(`Plant ${String(i).padStart(2, '0')}`);
     expect(await getAlternatives({ db, homeProfile: home(), candidate })).toHaveLength(3);
     expect(await getAlternatives({ db, homeProfile: home(), candidate, limit: 10 })).toHaveLength(
       10
     );
+  });
+
+  it('returns fewer than the limit when few plants look alike', async () => {
+    await addLookAlike('Only one');
+    await addSpecies('Different');
+    expect(names(await getAlternatives({ db, homeProfile: home(), candidate }))).toEqual([
+      'Only one',
+    ]);
   });
 });
 
@@ -313,14 +354,35 @@ describe('getAlternatives: explanation', () => {
     );
   });
 
-  it('says so when it shares nothing, and omits pet safety for a pet-free home', async () => {
-    await addSpecies('Different');
+  it('omits pet safety for a pet-free home', async () => {
+    await addLookAlike('Plain');
     const [alt] = await getAlternatives({ db, homeProfile: home(), candidate });
-    expect(alt.explanation).toBe('Looks different from Candidate, but suits your home. Low care.');
+    expect(alt.explanation).toBe('Similar look to Candidate: trailing habit. Low care.');
+  });
+
+  it('says "Listed non-toxic by the ASPCA" for a kids-only home', async () => {
+    await addLookAlike('Safe');
+    const [alt] = await getAlternatives({
+      db,
+      homeProfile: home({ has_small_kids: true }),
+      candidate,
+    });
+    expect(alt.explanation).toContain('Listed non-toxic by the ASPCA.');
+  });
+
+  it('lists the pets, not the ASPCA line, when the home has pets and kids', async () => {
+    await addLookAlike('Safe');
+    const [alt] = await getAlternatives({
+      db,
+      homeProfile: home({ has_cats: true, has_small_kids: true }),
+      candidate,
+    });
+    expect(alt.explanation).toContain('Non-toxic to cats.');
+    expect(alt.explanation).not.toContain('ASPCA');
   });
 
   it('mentions only the pets the home has', async () => {
-    await addSpecies('Safe');
+    await addLookAlike('Safe');
     const [alt] = await getAlternatives({ db, homeProfile: home({ has_dogs: true }), candidate });
     expect(alt.explanation).toContain('Non-toxic to dogs.');
     expect(alt.explanation).not.toContain('cats');

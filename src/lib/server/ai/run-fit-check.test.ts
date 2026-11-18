@@ -2,7 +2,7 @@ import { createClient, type Client } from '@libsql/client';
 import type { OpenRouter } from '@openrouter/sdk';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { runMigrations } from '../migrate';
-import type { AiFitCheckResponse } from './fit-check';
+import type { FitCheckResponse } from '$lib/types';
 import {
   DAILY_FIT_CHECK_LIMIT,
   MAX_CANDIDATE_LENGTH,
@@ -25,7 +25,7 @@ vi.mock('../queries/alternatives', async (importOriginal) => {
 
 let db: Client;
 
-const modelAnswer = (overrides: Partial<AiFitCheckResponse> = {}): AiFitCheckResponse => ({
+const modelAnswer = (overrides: Partial<FitCheckResponse> = {}): FitCheckResponse => ({
   verdict: 'good_fit',
   summary: 'Looks fine.',
   reasons: [{ factor: 'care', detail: 'low maintenance' }],
@@ -341,9 +341,55 @@ describe('runFitCheck', () => {
       expect(await failureOf(client)).toBe('provider_error');
     });
 
-    it('logs nothing for a failed check', async () => {
+    it('logs a refusal with verdict "error" and the token counts', async () => {
+      await failureOf(clientReturning(chatResult('', 'stop', 'I cannot help with that')));
+      const rows = await fitCheckRows();
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({
+        home_id: 1,
+        candidate_text: 'monstera',
+        species_id: 1,
+        verdict: 'error',
+        input_tokens: 120,
+        output_tokens: 30,
+        guardrail_fired: 0,
+      });
+      expect(JSON.parse(rows[0].response_json as string)).toMatchObject({ failure: 'refused' });
+    });
+
+    it('logs an invalid answer with verdict "error"', async () => {
       await failureOf(clientReturning(chatResult('not json at all')));
+      const rows = await fitCheckRows();
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({ verdict: 'error', input_tokens: 120, output_tokens: 30 });
+      expect(JSON.parse(rows[0].response_json as string)).toMatchObject({
+        failure: 'invalid_response',
+      });
+    });
+
+    it('logs nothing for a provider_error', async () => {
+      await failureOf(fakeClient(vi.fn().mockRejectedValue(new Error('429 rate limited'))));
       expect(await fitCheckRows()).toHaveLength(0);
+    });
+
+    it('counts failed checks toward the daily quota', async () => {
+      for (let i = 0; i < DAILY_FIT_CHECK_LIMIT; i++) {
+        await runFitCheck({
+          db,
+          client: clientReturning(chatResult(i % 2 ? 'not json at all' : modelAnswer())),
+          homeId: 2,
+          candidateText: 'monstera',
+        });
+      }
+      const send = vi.fn();
+      const result = await runFitCheck({
+        db,
+        client: fakeClient(send),
+        homeId: 2,
+        candidateText: 'monstera',
+      });
+      expect(result).toEqual({ status: 'quota_exceeded' });
+      expect(send).not.toHaveBeenCalled();
     });
   });
 });

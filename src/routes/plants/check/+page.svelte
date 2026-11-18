@@ -5,7 +5,7 @@
   import { homeStore } from '$lib/stores/home';
   import { apiFetch } from '$lib/api';
   import FitCheckResult from '$lib/components/FitCheckResult.svelte';
-  import type { FitCheckBody } from '$lib/server/ai/run-fit-check';
+  import type { FitCheckBody } from '$lib/types';
 
   type Suggestion = { id: number; common_name: string; scientific_name: string };
 
