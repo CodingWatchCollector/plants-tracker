@@ -195,7 +195,7 @@ Progress markers: `[x]` done and committed, `[~]` written but uncommitted, `[ ]`
 
 **Day 5: evals**
 
-- [ ] 16. `evals/fit-check/cases.json`, ~20 cases. Details in §6a.
+- [x] 16. `evals/fit-check/cases.json`, ~20 cases. Details in §6a.
 - [ ] 17. `evals/fit-check/run.ts` (`pnpm eval:fit-check`), run on Haiku 4.5, results committed. Details in §6a.
 
 **Day 6: alternatives stage B**
