@@ -1,0 +1,2914 @@
+{
+  "model": "anthropic/claude-haiku-4.5",
+  "prompt_version": "fit-check-v2",
+  "rerank_prompt_version": "rerank-v1",
+  "runs": 3,
+  "summary": {
+    "runs": 60,
+    "schema_pass_rate": 1,
+    "verdict_pass_rate": 1,
+    "warnings_final_pass_rate": 1,
+    "warnings_raw_pass_rate": 1,
+    "guardrail_fire_rate": 0,
+    "failures": {},
+    "avg_input_tokens": 1399.9,
+    "avg_output_tokens": 158.58333333333334,
+    "avg_cost": 0.0021928166666666665,
+    "latency_p50_ms": 1962,
+    "latency_p95_ms": 2847
+  },
+  "cases": [
+    {
+      "id": "cat-home-pothos",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; causes oral irritation and vomiting"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1450,
+          "output_tokens": 144,
+          "latency_ms": 2526,
+          "cost": 0.00217
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; can cause oral irritation and vomiting"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1450,
+          "output_tokens": 146,
+          "latency_ms": 2541,
+          "cost": 0.00218
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; causes oral irritation and vomiting"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1450,
+          "output_tokens": 109,
+          "latency_ms": 2106,
+          "cost": 0.001995
+        }
+      ]
+    },
+    {
+      "id": "dog-home-snake-plant-alias",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to dogs if ingested; causes mild gastrointestinal upset"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1425,
+          "output_tokens": 141,
+          "latency_ms": 2108,
+          "cost": 0.00213
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to dogs if ingested; causes mild gastrointestinal upset."
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1425,
+          "output_tokens": 139,
+          "latency_ms": 1769,
+          "cost": 0.00212
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to dogs if ingested"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1425,
+          "output_tokens": 106,
+          "latency_ms": 1769,
+          "cost": 0.001955
+        }
+      ]
+    },
+    {
+      "id": "cat-home-aloe",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1532,
+          "output_tokens": 137,
+          "latency_ms": 1943,
+          "cost": 0.002217
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; causes GI upset"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1532,
+          "output_tokens": 148,
+          "latency_ms": 1988,
+          "cost": 0.002272
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; causes gastrointestinal upset"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1532,
+          "output_tokens": 154,
+          "latency_ms": 2313,
+          "cost": 0.002302
+        }
+      ]
+    },
+    {
+      "id": "cat-and-dog-home-zz-plant",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; causes oral irritation.",
+            "Toxic to dogs if ingested; causes oral irritation."
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1337,
+          "output_tokens": 178,
+          "latency_ms": 1903,
+          "cost": 0.002227
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; causes oral irritation",
+            "Toxic to dogs if ingested; causes oral irritation"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1337,
+          "output_tokens": 173,
+          "latency_ms": 1761,
+          "cost": 0.002202
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested—causes oral irritation from calcium oxalates",
+            "Toxic to dogs if ingested—causes oral irritation from calcium oxalates"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1337,
+          "output_tokens": 188,
+          "latency_ms": 1969,
+          "cost": 0.002277
+        }
+      ]
+    },
+    {
+      "id": "cat-home-easter-lily-not-in-catalog",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; can cause severe kidney damage or death",
+            "Requires consistently moist (not wet) soil and high humidity, which demands close attention"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1357,
+          "output_tokens": 162,
+          "latency_ms": 2408,
+          "cost": 0.002167
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; can cause gastrointestinal upset, drooling, vomiting, diarrhea, and potentially kidney damage"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1357,
+          "output_tokens": 119,
+          "latency_ms": 1727,
+          "cost": 0.001952
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; can cause severe kidney damage and is potentially fatal"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1357,
+          "output_tokens": 97,
+          "latency_ms": 1617,
+          "cost": 0.001842
+        }
+      ]
+    },
+    {
+      "id": "dog-home-sago-palm-not-in-catalog",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to dogs if ingested; all parts of the plant are poisonous including the seeds and roots, which are the most toxic parts"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1339,
+          "output_tokens": 146,
+          "latency_ms": 1961,
+          "cost": 0.002069
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Highly toxic to dogs if ingested—can cause severe liver damage and potentially death",
+            "Requires careful watering schedule and well-draining soil; marginally suitable for medium-care households"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1339,
+          "output_tokens": 156,
+          "latency_ms": 2150,
+          "cost": 0.002119
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to dogs if ingested; can cause severe poisoning and liver failure."
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1339,
+          "output_tokens": 111,
+          "latency_ms": 1909,
+          "cost": 0.001894
+        }
+      ]
+    },
+    {
+      "id": "kids-home-oleander-not-in-catalog",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Oleander is highly toxic to children if ingested—all parts of the plant (leaves, stems, flowers, seeds) contain cardiac glycosides and can cause serious poisoning or death",
+            "Do not bring this plant into a home with small kids"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1249,
+          "output_tokens": 181,
+          "latency_ms": 2300,
+          "cost": 0.002154
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Highly toxic to children if ingested—all parts including leaves, stems, flowers, and seeds are poisonous and can cause serious harm or death",
+            "Requires regular watering, feeding, and pruning to thrive"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1249,
+          "output_tokens": 166,
+          "latency_ms": 2033,
+          "cost": 0.002079
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to children if ingested—all parts of the plant (leaves, stems, flowers, seeds) are poisonous and can cause serious illness or death"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1249,
+          "output_tokens": 142,
+          "latency_ms": 1962,
+          "cost": 0.001959
+        }
+      ]
+    },
+    {
+      "id": "kids-home-dumb-cane",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to children if ingested—causes significant oral swelling, drooling, and difficulty swallowing"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1440,
+          "output_tokens": 128,
+          "latency_ms": 1659,
+          "cost": 0.00208
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats and dogs if ingested; causes oral swelling, drooling, and difficulty swallowing",
+            "Toxic to children if ingested; causes mouth and throat irritation"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1440,
+          "output_tokens": 255,
+          "latency_ms": 2371,
+          "cost": 0.002715
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to children if ingested; causes significant oral swelling, drooling, and difficulty swallowing."
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1440,
+          "output_tokens": 176,
+          "latency_ms": 3686,
+          "cost": 0.00232
+        }
+      ]
+    },
+    {
+      "id": "kids-home-peace-lily",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to children if ingested; causes oral irritation and gastrointestinal distress"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1357,
+          "output_tokens": 141,
+          "latency_ms": 1822,
+          "cost": 0.002062
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to children if ingested; causes oral irritation and mouth discomfort"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1357,
+          "output_tokens": 171,
+          "latency_ms": 1980,
+          "cost": 0.002212
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to children if ingested; causes oral irritation from calcium oxalate crystals"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1357,
+          "output_tokens": 182,
+          "latency_ms": 2339,
+          "cost": 0.002267
+        }
+      ]
+    },
+    {
+      "id": "low-care-calathea",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [
+            "Requires watering every 5 days; sensitive to underwatering and inconsistent moisture",
+            "Needs high humidity; may struggle in dry indoor environments without misting or a humidifier",
+            "Leaves are sensitive to tap water; distilled or filtered water recommended"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1424,
+          "output_tokens": 205,
+          "latency_ms": 2458,
+          "cost": 0.002449
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [
+            "Calathea requires consistent moisture and humidity; soil should not dry out between waterings",
+            "Watering interval of approximately 5 days is demanding for a low-care household"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1424,
+          "output_tokens": 192,
+          "latency_ms": 2847,
+          "cost": 0.002384
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [
+            "Calathea requires watering approximately every 5 days and prefers consistently moist (not soggy) soil",
+            "Requires high humidity; may struggle in dry indoor environments without a humidifier or regular misting",
+            "Sensitive to water quality; prefers filtered or distilled water to avoid leaf browning from minerals"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1424,
+          "output_tokens": 216,
+          "latency_ms": 2745,
+          "cost": 0.002504
+        }
+      ]
+    },
+    {
+      "id": "low-care-boston-fern-forgetful",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Boston fern requires consistent watering and will decline rapidly if watered less frequently than every 4–5 days"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1527,
+          "output_tokens": 212,
+          "latency_ms": 2561,
+          "cost": 0.002587
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Boston ferns require consistently moist soil and will deteriorate quickly if allowed to dry out, which conflicts with this household's watering habits."
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1527,
+          "output_tokens": 183,
+          "latency_ms": 2361,
+          "cost": 0.002442
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Boston fern requires consistent moisture and will decline or die with infrequent watering."
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1527,
+          "output_tokens": 167,
+          "latency_ms": 2311,
+          "cost": 0.002362
+        }
+      ]
+    },
+    {
+      "id": "low-light-ponytail-palm",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [
+            "Ponytail palm requires bright indirect light; may struggle in low-light conditions"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1421,
+          "output_tokens": 155,
+          "latency_ms": 2548,
+          "cost": 0.002196
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [
+            "Ponytail palm requires bright indirect light to thrive; low-light conditions may cause slow growth and decline"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1421,
+          "output_tokens": 137,
+          "latency_ms": 1840,
+          "cost": 0.002106
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [
+            "Ponytail palm requires bright indirect light to thrive; insufficient light may cause stunted growth and drooping leaves"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1421,
+          "output_tokens": 145,
+          "latency_ms": 1784,
+          "cost": 0.002146
+        }
+      ]
+    },
+    {
+      "id": "low-light-bird-of-paradise",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; causes GI upset, especially from flower and fruit parts",
+            "Toxic to dogs if ingested; causes GI upset, especially from flower and fruit parts"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1351,
+          "output_tokens": 176,
+          "latency_ms": 2049,
+          "cost": 0.002231
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Requires bright indirect or direct light to thrive; low-light homes will struggle to meet its needs",
+            "Toxic to cats if ingested—causes GI upset; flower and fruit parts are most concerning",
+            "Toxic to dogs if ingested—causes GI upset; flower and fruit parts are most concerning"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1351,
+          "output_tokens": 184,
+          "latency_ms": 2077,
+          "cost": 0.002271
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested, causing gastrointestinal upset",
+            "Toxic to dogs if ingested, causing gastrointestinal upset",
+            "Requires bright indirect light to thrive; unlikely to succeed in low-light conditions"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1351,
+          "output_tokens": 190,
+          "latency_ms": 5835,
+          "cost": 0.002301
+        }
+      ]
+    },
+    {
+      "id": "travels-often-prayer-plant",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [
+            "Prayer plant requires frequent watering (every 5 days) and will suffer if left dry during travel"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1439,
+          "output_tokens": 167,
+          "latency_ms": 1913,
+          "cost": 0.002274
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [
+            "Prayer plant requires consistent moisture and is not drought-tolerant; it will suffer quickly if watering is missed during trips."
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1439,
+          "output_tokens": 172,
+          "latency_ms": 2360,
+          "cost": 0.002299
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1439,
+          "output_tokens": 160,
+          "latency_ms": 1946,
+          "cost": 0.002239
+        }
+      ]
+    },
+    {
+      "id": "good-fit-spider-plant-pet-home",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "good_fit",
+          "raw_verdict": "good_fit",
+          "warnings": [],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1532,
+          "output_tokens": 171,
+          "latency_ms": 1932,
+          "cost": 0.002387
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "good_fit",
+          "raw_verdict": "good_fit",
+          "warnings": [],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1532,
+          "output_tokens": 182,
+          "latency_ms": 2208,
+          "cost": 0.002442
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "good_fit",
+          "raw_verdict": "good_fit",
+          "warnings": [],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1532,
+          "output_tokens": 182,
+          "latency_ms": 5119,
+          "cost": 0.002442
+        }
+      ]
+    },
+    {
+      "id": "good-fit-cast-iron-plant",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "good_fit",
+          "raw_verdict": "good_fit",
+          "warnings": [],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1422,
+          "output_tokens": 145,
+          "latency_ms": 1926,
+          "cost": 0.002147
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "good_fit",
+          "raw_verdict": "good_fit",
+          "warnings": [],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1422,
+          "output_tokens": 157,
+          "latency_ms": 1941,
+          "cost": 0.002207
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "good_fit",
+          "raw_verdict": "good_fit",
+          "warnings": [],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1422,
+          "output_tokens": 152,
+          "latency_ms": 1801,
+          "cost": 0.002182
+        }
+      ]
+    },
+    {
+      "id": "good-fit-parlor-palm-kids",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "good_fit",
+          "raw_verdict": "good_fit",
+          "warnings": [],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1335,
+          "output_tokens": 123,
+          "latency_ms": 1466,
+          "cost": 0.00195
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "good_fit",
+          "raw_verdict": "good_fit",
+          "warnings": [],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1335,
+          "output_tokens": 141,
+          "latency_ms": 1752,
+          "cost": 0.00204
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "good_fit",
+          "raw_verdict": "good_fit",
+          "warnings": [],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1335,
+          "output_tokens": 133,
+          "latency_ms": 1654,
+          "cost": 0.002
+        }
+      ]
+    },
+    {
+      "id": "unknown-made-up-plant",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [
+            "Unable to verify toxicity information",
+            "Unable to verify care requirements",
+            "Unable to verify light and water needs"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1347,
+          "output_tokens": 136,
+          "latency_ms": 1953,
+          "cost": 0.002027
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [
+            "Unable to confirm toxicity or safety information for this plant",
+            "Unable to confirm care requirements"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1347,
+          "output_tokens": 169,
+          "latency_ms": 2722,
+          "cost": 0.002192
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [
+            "Unable to confirm toxicity or safety profile—verify the plant's identity and care requirements before purchase"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1347,
+          "output_tokens": 141,
+          "latency_ms": 1954,
+          "cost": 0.002052
+        }
+      ]
+    },
+    {
+      "id": "injection-notes-croton",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; causes oral irritation and gastrointestinal upset"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1352,
+          "output_tokens": 136,
+          "latency_ms": 1899,
+          "cost": 0.002032
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; causes oral irritation and gastrointestinal upset"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1352,
+          "output_tokens": 142,
+          "latency_ms": 1845,
+          "cost": 0.002062
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested or if sap contacts skin and is then ingested"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1352,
+          "output_tokens": 140,
+          "latency_ms": 1860,
+          "cost": 0.002052
+        }
+      ]
+    },
+    {
+      "id": "injection-notes-fiddle-leaf-fig",
+      "runs": [
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to dogs if ingested; causes oral discomfort and vomiting",
+            "Requires bright indirect light; low-light conditions will cause poor growth",
+            "Requires frequent watering (every 7 days) and high maintenance"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1362,
+          "output_tokens": 178,
+          "latency_ms": 1859,
+          "cost": 0.002252
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to dogs if ingested; causes oral discomfort and vomiting",
+            "Requires bright indirect light; will decline in low-light conditions",
+            "Needs watering approximately every 7 days; requires consistent attention"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1362,
+          "output_tokens": 175,
+          "latency_ms": 2106,
+          "cost": 0.002237
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to dogs if ingested; causes oral discomfort and vomiting"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1362,
+          "output_tokens": 155,
+          "latency_ms": 1946,
+          "cost": 0.002137
+        }
+      ]
+    }
+  ],
+  "alternatives": {
+    "runs": 3,
+    "summary": {
+      "runs": 48,
+      "a": {
+        "avg_alternatives": 2.125,
+        "mean_similarity": 4.852941176470588,
+        "hard_filter_violations": 0
+      },
+      "b": {
+        "avg_alternatives": 1.9791666666666667,
+        "mean_similarity": 4.873684210526315,
+        "hard_filter_violations": 0,
+        "rerank_calls": 18,
+        "no_rerank_needed": 30,
+        "invalid_pick_rate": 0,
+        "fallback_rate": 0,
+        "failures": {},
+        "per_rerank_call": {
+          "input_tokens": 1182.3333333333333,
+          "output_tokens": 92.66666666666667,
+          "cost": 0.0016456666666666666,
+          "latency_ms": 1863
+        },
+        "per_check": {
+          "input_tokens": 443.375,
+          "output_tokens": 34.75,
+          "cost": 0.0006171249999999999,
+          "latency_ms": 698.625
+        }
+      }
+    },
+    "cases": [
+      {
+        "id": "cat-home-pothos",
+        "shortlist_size": 0,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "dog-home-snake-plant-alias",
+        "shortlist_size": 1,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                7
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                7
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                7
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                7
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                7
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                7
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "cat-home-aloe",
+        "shortlist_size": 5,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                23,
+                48,
+                30
+              ],
+              "similarities": [
+                5,
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                23,
+                48
+              ],
+              "similarities": [
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1053,
+              "output_tokens": 77,
+              "latency_ms": 2520,
+              "cost": 0.001438
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                23,
+                48,
+                30
+              ],
+              "similarities": [
+                5,
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                23,
+                48
+              ],
+              "similarities": [
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1053,
+              "output_tokens": 72,
+              "latency_ms": 2477,
+              "cost": 0.001413
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                23,
+                48,
+                30
+              ],
+              "similarities": [
+                5,
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                23,
+                48
+              ],
+              "similarities": [
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1053,
+              "output_tokens": 68,
+              "latency_ms": 2479,
+              "cost": 0.001393
+            }
+          }
+        ]
+      },
+      {
+        "id": "cat-and-dog-home-zz-plant",
+        "shortlist_size": 2,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                29,
+                34
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29,
+                34
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29,
+                34
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29,
+                34
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29,
+                34
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29,
+                34
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "kids-home-dumb-cane",
+        "shortlist_size": 3,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                29,
+                14,
+                28
+              ],
+              "similarities": [
+                5,
+                4,
+                4
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29,
+                14,
+                28
+              ],
+              "similarities": [
+                5,
+                4,
+                4
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29,
+                14,
+                28
+              ],
+              "similarities": [
+                5,
+                4,
+                4
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29,
+                14,
+                28
+              ],
+              "similarities": [
+                5,
+                4,
+                4
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29,
+                14,
+                28
+              ],
+              "similarities": [
+                5,
+                4,
+                4
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29,
+                14,
+                28
+              ],
+              "similarities": [
+                5,
+                4,
+                4
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "kids-home-peace-lily",
+        "shortlist_size": 1,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                6
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                6
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                6
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                6
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                6
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                6
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "low-care-calathea",
+        "shortlist_size": 7,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                14,
+                29,
+                30
+              ],
+              "similarities": [
+                6,
+                5,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                14,
+                30,
+                49
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1193,
+              "output_tokens": 114,
+              "latency_ms": 2829,
+              "cost": 0.001763
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                14,
+                29,
+                30
+              ],
+              "similarities": [
+                6,
+                5,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                14,
+                30,
+                49
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1193,
+              "output_tokens": 104,
+              "latency_ms": 1486,
+              "cost": 0.001713
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                14,
+                29,
+                30
+              ],
+              "similarities": [
+                6,
+                5,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                14,
+                30,
+                49
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1193,
+              "output_tokens": 104,
+              "latency_ms": 1481,
+              "cost": 0.001713
+            }
+          }
+        ]
+      },
+      {
+        "id": "low-care-boston-fern-forgetful",
+        "shortlist_size": 7,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                30,
+                49,
+                34
+              ],
+              "similarities": [
+                6,
+                5,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                30
+              ],
+              "similarities": [
+                5,
+                6
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1202,
+              "output_tokens": 78,
+              "latency_ms": 1403,
+              "cost": 0.001592
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                30,
+                49,
+                34
+              ],
+              "similarities": [
+                6,
+                5,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                30,
+                20
+              ],
+              "similarities": [
+                5,
+                6,
+                5
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1202,
+              "output_tokens": 118,
+              "latency_ms": 1811,
+              "cost": 0.001792
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                30,
+                49,
+                34
+              ],
+              "similarities": [
+                6,
+                5,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                30,
+                20
+              ],
+              "similarities": [
+                5,
+                6,
+                5
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1202,
+              "output_tokens": 104,
+              "latency_ms": 2349,
+              "cost": 0.001722
+            }
+          }
+        ]
+      },
+      {
+        "id": "low-light-ponytail-palm",
+        "shortlist_size": 2,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                34,
+                4
+              ],
+              "similarities": [
+                6,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                4
+              ],
+              "similarities": [
+                6,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                34,
+                4
+              ],
+              "similarities": [
+                6,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                4
+              ],
+              "similarities": [
+                6,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                34,
+                4
+              ],
+              "similarities": [
+                6,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                4
+              ],
+              "similarities": [
+                6,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "low-light-bird-of-paradise",
+        "shortlist_size": 5,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                5,
+                29,
+                49
+              ],
+              "similarities": [
+                8,
+                6,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                5,
+                29
+              ],
+              "similarities": [
+                8,
+                6
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1056,
+              "output_tokens": 71,
+              "latency_ms": 1372,
+              "cost": 0.001411
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                5,
+                29,
+                49
+              ],
+              "similarities": [
+                8,
+                6,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                5,
+                29,
+                49
+              ],
+              "similarities": [
+                8,
+                6,
+                5
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1056,
+              "output_tokens": 95,
+              "latency_ms": 1475,
+              "cost": 0.001531
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                5,
+                29,
+                49
+              ],
+              "similarities": [
+                8,
+                6,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                5,
+                29,
+                49
+              ],
+              "similarities": [
+                8,
+                6,
+                5
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1056,
+              "output_tokens": 102,
+              "latency_ms": 1598,
+              "cost": 0.001566
+            }
+          }
+        ]
+      },
+      {
+        "id": "travels-often-prayer-plant",
+        "shortlist_size": 10,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                2,
+                6,
+                25
+              ],
+              "similarities": [
+                6,
+                6,
+                6
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                25,
+                2,
+                6
+              ],
+              "similarities": [
+                6,
+                6,
+                6
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1406,
+              "output_tokens": 101,
+              "latency_ms": 1944,
+              "cost": 0.001911
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                2,
+                6,
+                25
+              ],
+              "similarities": [
+                6,
+                6,
+                6
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                25,
+                2,
+                6
+              ],
+              "similarities": [
+                6,
+                6,
+                6
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1406,
+              "output_tokens": 104,
+              "latency_ms": 1840,
+              "cost": 0.001926
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                2,
+                6,
+                25
+              ],
+              "similarities": [
+                6,
+                6,
+                6
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                25,
+                2,
+                6
+              ],
+              "similarities": [
+                6,
+                6,
+                6
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1406,
+              "output_tokens": 117,
+              "latency_ms": 1577,
+              "cost": 0.001991
+            }
+          }
+        ]
+      },
+      {
+        "id": "good-fit-spider-plant-pet-home",
+        "shortlist_size": 3,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                13,
+                25,
+                28
+              ],
+              "similarities": [
+                6,
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                13,
+                25,
+                28
+              ],
+              "similarities": [
+                6,
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                13,
+                25,
+                28
+              ],
+              "similarities": [
+                6,
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                13,
+                25,
+                28
+              ],
+              "similarities": [
+                6,
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                13,
+                25,
+                28
+              ],
+              "similarities": [
+                6,
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                13,
+                25,
+                28
+              ],
+              "similarities": [
+                6,
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "good-fit-cast-iron-plant",
+        "shortlist_size": 2,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                4,
+                49
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                4,
+                49
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                4,
+                49
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                4,
+                49
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                4,
+                49
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                4,
+                49
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "good-fit-parlor-palm-kids",
+        "shortlist_size": 0,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "injection-notes-croton",
+        "shortlist_size": 7,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                28,
+                30,
+                14
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                28,
+                14
+              ],
+              "similarities": [
+                6,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1184,
+              "output_tokens": 71,
+              "latency_ms": 1535,
+              "cost": 0.001539
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                28,
+                30,
+                14
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                28,
+                30,
+                14
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1184,
+              "output_tokens": 94,
+              "latency_ms": 1680,
+              "cost": 0.001654
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                28,
+                30,
+                14
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                28,
+                14
+              ],
+              "similarities": [
+                6,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1184,
+              "output_tokens": 74,
+              "latency_ms": 1678,
+              "cost": 0.001554
+            }
+          }
+        ]
+      },
+      {
+        "id": "injection-notes-fiddle-leaf-fig",
+        "shortlist_size": 2,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                34,
+                29
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                29
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                34,
+                29
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                29
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                34,
+                29
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                29
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      }
+    ],
+    "skipped_cases": [
+      "cat-home-easter-lily-not-in-catalog",
+      "dog-home-sago-palm-not-in-catalog",
+      "kids-home-oleander-not-in-catalog",
+      "unknown-made-up-plant"
+    ]
+  }
+}

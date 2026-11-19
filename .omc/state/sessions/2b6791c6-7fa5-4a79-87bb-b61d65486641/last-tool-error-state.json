@@ -1,0 +1,7 @@
+{
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"/home/abegunenko/.claude/projects/-home-abegunenko-personal-plants-tracker/memory/MEMORY.md\"}",
+  "error": "File does not exist. Note: your current working directory is /home/abegunenko/personal/plants-tracker.",
+  "timestamp": "2026-06-28T22:00:22.150Z",
+  "retry_count": 1
+}

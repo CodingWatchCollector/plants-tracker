@@ -1,0 +1,12 @@
+allowBuilds:
+  '@openrouter/sdk': true
+  esbuild: true
+  sharp: true
+  workerd: true
+
+# Skip package versions published less than 7 days ago (value in minutes)
+minimumReleaseAge: 10080
+
+# chokidar 4.0.3 was published with weaker provenance than earlier releases; known false positive
+trustPolicyExclude:
+  - chokidar@4.0.3

@@ -1,0 +1,17 @@
+{
+  "active": false,
+  "current_phase": "complete",
+  "plan_path": ".omc/specs/deep-interview-plants-tracker-future.md",
+  "completed_at": "2026-06-29T00:00:00Z",
+  "interview_id": "plants-tracker-future-001",
+  "final_ambiguity": "0.18",
+  "rounds_total": "16",
+  "spec_path": ".omc/specs/deep-interview-plants-tracker-future.md",
+  "ship_order": "watering-history,plant-intelligence,members-identity,notification-ux,multi-home-ux",
+  "_meta": {
+    "mode": "deep-interview",
+    "sessionId": null,
+    "updatedAt": "2026-06-28T22:21:22.923Z",
+    "updatedBy": "state_write_tool"
+  }
+}

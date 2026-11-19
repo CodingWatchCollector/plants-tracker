@@ -7,3 +7,6 @@ bun.lockb
 
 # Miscellaneous
 /static/
+
+# Eval output written by evals/fit-check/run.ts
+/evals/fit-check/results/
