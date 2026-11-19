@@ -10,7 +10,7 @@ This page describes how it works, why the main decisions were made, what the eva
 flowchart TD
   page["/plants/check page"] -->|POST candidate| route["POST /api/fit-check"]
   route --> run["runFitCheck"]
-  run -->|"20 or more today?"| quota[("fit_checks")]
+  run -->|"daily limit reached?"| quota[("fit_checks")]
   quota -->|yes| r429["429"]
   run --> load["load profile, owned plants, catalog match<br/>(Turso)"]
   load --> evaluate["evaluateFitCheck"]
@@ -30,7 +30,7 @@ flowchart TD
 - The route needs a home cookie. It maps results to statuses: quota used up is 429, a refusal is 422, an unusable answer is 502, and a provider error or an unreadable quota count is 503.
 - `runFitCheck` (`src/lib/server/ai/run-fit-check.ts`) checks the quota, loads the data, runs the model call and the alternatives in parallel, logs the check and builds the response. The fields `data_source`, `species_id` and `alternatives` are set by code and never by the model.
 - `evaluateFitCheck` (`fit-check.ts`) has no database access. It calls `structuredCall`, which sends the request, checks the finish reason, the refusal flag, the content type and then the Zod schema. The deterministic guardrail runs after that.
-- The quota is 20 checks per home per UTC day. Refused and invalid answers are logged with verdict `error` and count toward it, because they were paid for. A provider error is not logged and does not count, so an outage does not use up a home's quota.
+- The quota is `DAILY_FIT_CHECK_LIMIT` checks per home per UTC day (5 at the time of writing, set in `run-fit-check.ts`). Refused and invalid answers are logged with verdict `error` and count toward it, because they were paid for. A provider error is not logged and does not count, so an outage does not use up a home's quota.
 - Candidate text is trimmed and capped at 100 characters.
 
 ### The guardrail
@@ -95,7 +95,7 @@ The 20 cases (`evals/fit-check/cases.json`) cover pets with catalog and non-cata
 
 The first run, on `fit-check-v1`, scored 98.3% on final warnings. One of 60 runs, an oleander check for a home with small kids, put the toxicity and the children in two separate warnings, which the matcher does not accept. The guardrail cannot help there because oleander is not in the catalog. One sentence in the prompt (each warning must name who is at risk) fixed it, and the second run was clean. One miss in 60 runs is within noise, so the fix is supported by one clean run and not by a proven rate.
 
-Cost is about a third of the $0.006 the plan estimated, so a home using its whole daily quota of 20 checks costs about $0.04.
+Cost is about a third of the $0.006 the plan estimated, so a home using its whole daily quota (5 checks at the time of writing) costs about $0.011.
 
 ### Alternatives, stage A and stage B, `rerank-v1`, 48 runs
 

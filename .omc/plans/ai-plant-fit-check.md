@@ -1,6 +1,6 @@
 # Plan: AI Plant Fit Check (learning detour, ~1 week)
 
-Status: **approved** (2026-09-21), revised 2026-11-18 (model fixed to Claude Haiku 4.5, decisions for steps 15-20 made up front, review fixes added)
+Status: **shipped**, confirmed live in production 2026-11-19. Approved 2026-09-21, revised 2026-11-18 (model fixed to Claude Haiku 4.5, decisions for steps 15-20 made up front, review fixes added). One open item: the catalog `source_url` review (§7). Changes after the plan: the daily limit is now 5 (`DAILY_FIT_CHECK_LIMIT`), not 20, so the 20-check figures below are as planned; and the checked plant itself has an add button ("Add this plant" on a good fit, "Add anyway" otherwise).
 Created: 2026-09-21
 Scope: learning project. The parked roadmap in `.omc/specs/deep-interview-plants-tracker-future.md` (on the `WIP` branch) stays untouched; the existing `plants` model stays as is.
 
@@ -319,22 +319,22 @@ Rules for the case set:
 
 ## 7. Acceptance criteria
 
-- [ ] Migrations v2-v5 apply to a fresh DB, and re-running them is a no-op.
-- [ ] The catalog holds ≥ 40 reviewed rows, each with `source_url` and `reviewed_at`. **Open:** `scripts/catalog-seed-data.json` has no `source_url`; the user fills it during review.
-- [ ] `PUT /api/home/profile` returns 400 for out-of-enum values and for notes over 500 chars. **Open:** no test yet (step 20).
-- [ ] Profile suggest returns `care_commitment: 'low'` for a home whose matched plants are all `care_level = 'low'` (unit test). **Open:** no test yet (step 20).
-- [ ] `evaluateFitCheck` returns a schema-valid answer in 100% of eval runs on Haiku 4.5.
-- [ ] A home with `has_cats = 1` checking a catalog plant with `toxic_to_cats = 1` never gets `good_fit` and always gets a toxicity warning (guardrail unit test, no model call).
-- [ ] A home with `has_small_kids = 1` checking a catalog plant toxic to cats or dogs always gets a warning mentioning children (guardrail unit test).
-- [ ] The 21st check in one day for the same home returns 429, counting refused and invalid answers too.
-- [ ] A candidate missing from the catalog returns `data_source: 'model_knowledge'`, and the UI shows the unverified badge.
-- [ ] Stage A alternatives never include a plant that fails the hard filters (pets, kids proxy, care, light, drought) or scores below `MIN_SIMILARITY` (unit test against an in-memory libsql DB).
-- [ ] Every stage B alternative is a `species_id` from the shortlist (enforced in code, unit-tested).
-- [ ] "Add this plant" opens the form with the scientific name and watering interval pre-filled from the catalog.
-- [ ] Haiku 4.5 scores ≥ 90% on verdicts and 100% on required warnings (final, after the guardrail) in the eval; the raw warning rate is reported.
-- [ ] The eval report states the average cost per check.
-- [ ] `OPENROUTER_API_KEY` never reaches the client bundle (`grep -r` of the build output after `pnpm build` finds nothing).
-- [ ] `pnpm check`, `pnpm lint`, `pnpm build` and `pnpm test` pass.
+- [x] Migrations v2-v5 apply to a fresh DB, and re-running them is a no-op.
+- [ ] The catalog holds ≥ 40 reviewed rows, each with `source_url` and `reviewed_at`. **Open:** the catalog has 50 rows with `reviewed_at`, but `scripts/catalog-seed-data.json` has no `source_url`, so the toxicity facts are not yet checked against a source. The user fills it during review.
+- [x] `PUT /api/home/profile` returns 400 for out-of-enum values and for notes over 500 chars. Tested in `src/routes/api/home/profile/profile.test.ts`.
+- [x] Profile suggest returns `care_commitment: 'low'` for a home whose matched plants are all `care_level = 'low'` (unit test). Tested in `src/routes/api/home/profile/suggest/suggest.test.ts`.
+- [x] `evaluateFitCheck` returns a schema-valid answer in 100% of eval runs on Haiku 4.5.
+- [x] A home with `has_cats = 1` checking a catalog plant with `toxic_to_cats = 1` never gets `good_fit` and always gets a toxicity warning (guardrail unit test, no model call).
+- [x] A home with `has_small_kids = 1` checking a catalog plant toxic to cats or dogs always gets a warning mentioning children (guardrail unit test).
+- [x] The check after the daily limit for the same home returns 429, counting refused and invalid answers too. The limit is `DAILY_FIT_CHECK_LIMIT`, planned as 20 and now 5.
+- [x] A candidate missing from the catalog returns `data_source: 'model_knowledge'`, and the UI shows the unverified badge. The data source is unit-tested; the UI was confirmed in production by the user.
+- [x] Stage A alternatives never include a plant that fails the hard filters (pets, kids proxy, care, light, drought) or scores below `MIN_SIMILARITY` (unit test against an in-memory libsql DB).
+- [x] Every stage B alternative is a `species_id` from the shortlist (enforced in code, unit-tested).
+- [x] "Add this plant" opens the form with the scientific name and watering interval pre-filled from the catalog. Confirmed in the browser by the user.
+- [x] Haiku 4.5 scores ≥ 90% on verdicts and 100% on required warnings (final, after the guardrail) in the eval; the raw warning rate is reported.
+- [x] The eval report states the average cost per check.
+- [x] `OPENROUTER_API_KEY` never reaches the client bundle (`grep -r` of the build output after `pnpm build` finds nothing).
+- [x] `pnpm check`, `pnpm lint`, `pnpm build` and `pnpm test` pass.
 
 ## 8. Risks and mitigations
 
