@@ -1,5 +1,6 @@
 // Pure parts of the fit-check eval: case parsing, scoring, aggregation, and running cases against
-// a client. No DB, no env, no file access, so `pnpm test` covers it with a mocked client.
+// a client, for the fit check and for the alternatives comparison. No DB, no env, no file access
+// (the alternatives shortlist comes in as an argument), so `pnpm test` covers it with a mocked client.
 // Only relative value imports: the eval runs under tsx, which doesn't resolve SvelteKit aliases.
 import type { OpenRouter } from '@openrouter/sdk';
 import { parseArgs } from 'node:util';
@@ -11,6 +12,15 @@ import {
   type FitCheckOutcome,
   type WarningSubject,
 } from '../../src/lib/server/ai/fit-check';
+import {
+  MAX_ALTERNATIVES,
+  MIN_VALID_PICKS,
+  chooseAlternatives,
+  needsRerank,
+  rerankAlternatives,
+  type RerankResult,
+} from '../../src/lib/server/ai/rerank-alternatives';
+import { MIN_SIMILARITY, type Alternative } from '../../src/lib/server/queries/alternatives';
 import type { FitCheckVerdict, HomeProfile, OwnedPlant, PlantSpecies } from '../../src/lib/types';
 
 const verdictSchema = z.enum(['good_fit', 'caution', 'poor_fit']);
@@ -316,9 +326,14 @@ export const executeCases = async ({
   }));
 };
 
-export type EvalArgs = { model: string; runs: number; caseId: string | null };
+export type EvalArgs = {
+  model: string;
+  runs: number;
+  caseId: string | null;
+  alternatives: boolean;
+};
 
-// Throws on an unknown flag (--alternatives arrives with step 19) or a bad value.
+// Throws on an unknown flag or a bad value.
 export const parseEvalArgs = (argv: string[], defaultModel: string): EvalArgs => {
   const { values } = parseArgs({
     args: argv,
@@ -326,6 +341,7 @@ export const parseEvalArgs = (argv: string[], defaultModel: string): EvalArgs =>
       model: { type: 'string' },
       runs: { type: 'string' },
       case: { type: 'string' },
+      alternatives: { type: 'boolean' },
     },
     strict: true,
   });
@@ -333,5 +349,323 @@ export const parseEvalArgs = (argv: string[], defaultModel: string): EvalArgs =>
   if (!Number.isInteger(runs) || runs < 1) {
     throw new Error(`--runs must be a positive integer, got "${values.runs}"`);
   }
-  return { model: values.model ?? defaultModel, runs, caseId: values.case ?? null };
+  return {
+    model: values.model ?? defaultModel,
+    runs,
+    caseId: values.case ?? null,
+    alternatives: values.alternatives ?? false,
+  };
+};
+
+// ---------------------------------------------------------------------------------------------
+// Alternatives: stage A (the SQL top 3) against stage B (the model re-ranks the SQL top 10).
+// Both are computed from the same shortlist, which getAlternatives returns with limit 10 and
+// already ordered, so its first 3 entries are exactly what limit 3 would return.
+// ---------------------------------------------------------------------------------------------
+
+const CARE_ORDER = ['low', 'medium', 'high'];
+const LIGHT_ORDER = ['low', 'medium', 'bright'];
+
+// Rechecks one returned alternative against the hard filters in code, independently of the SQL
+// that produced it. Returns what it violates; an empty list means the plant is allowed.
+export const hardFilterViolations = (
+  profile: EvalCase['profile'],
+  candidate: PlantSpecies,
+  ownedIds: number[],
+  alt: Alternative
+): string[] => {
+  const s = alt.species;
+  const violations: string[] = [];
+  if (s.id === candidate.id) violations.push('is the candidate');
+  if (ownedIds.includes(s.id)) violations.push('already owned');
+  if (profile.has_cats && s.toxic_to_cats) violations.push('toxic to cats');
+  if (profile.has_dogs && s.toxic_to_dogs) violations.push('toxic to dogs');
+  if (profile.has_small_kids && (s.toxic_to_cats || s.toxic_to_dogs)) {
+    violations.push('toxic (small kids)');
+  }
+  if (CARE_ORDER.indexOf(s.care_level) > CARE_ORDER.indexOf(profile.care_commitment)) {
+    violations.push('care level above commitment');
+  }
+  if (LIGHT_ORDER.indexOf(s.light_needs) > LIGHT_ORDER.indexOf(profile.typical_light)) {
+    violations.push('light needs above home light');
+  }
+  if (profile.travels_often && s.drought_tolerance === 'low') {
+    violations.push('low drought tolerance for a home that travels');
+  }
+  if (alt.similarity < MIN_SIMILARITY) violations.push('similarity below minimum');
+  return violations;
+};
+
+export type AlternativesModeRun = {
+  species_ids: number[];
+  similarities: number[];
+  violations: string[]; // "<species_id>: <rule>"
+};
+
+export type AlternativesRun = {
+  a: AlternativesModeRun;
+  b: AlternativesModeRun & {
+    rerank_called: boolean; // false when the shortlist had 3 plants or fewer
+    fallback: boolean; // the SQL top 3 was used although the re-rank was needed
+    failure: FitCheckFailure | null;
+    valid_picks: number;
+    invalid_picks: number;
+    input_tokens: number | null;
+    output_tokens: number | null;
+    latency_ms: number | null;
+    cost: number | null;
+  };
+};
+
+// A case with a catalog candidate and its SQL shortlist (limit 10, owned plants excluded).
+export type PreparedAlternatives = {
+  prepared: PreparedCase & { candidate: PlantSpecies };
+  shortlist: Alternative[];
+};
+
+const modeRun = (
+  chosenIds: number[],
+  shortlist: Alternative[],
+  prepared: PreparedAlternatives['prepared']
+): AlternativesModeRun => {
+  const byId = new Map(shortlist.map((a) => [a.species.id, a]));
+  const ownedIds = prepared.ownedPlants.flatMap((p) => (p.species ? [p.species.id] : []));
+  const chosen = chosenIds.flatMap((id) => byId.get(id) ?? []);
+  return {
+    species_ids: chosenIds,
+    similarities: chosen.map((a) => a.similarity),
+    violations: chosen.flatMap((a) =>
+      hardFilterViolations(prepared.case.profile, prepared.candidate, ownedIds, a).map(
+        (v) => `${a.species.id}: ${v}`
+      )
+    ),
+  };
+};
+
+type EvaluateAlternativesProps = {
+  client: OpenRouter;
+  model: string;
+  item: PreparedAlternatives;
+  prices: Prices;
+};
+
+// One run for one case: stage A and stage B from the same shortlist. Stage B follows the same
+// rules as runFitCheck: no model call for a short shortlist, and chooseAlternatives for the
+// fallback.
+export const evaluateAlternatives = async ({
+  client,
+  model,
+  item,
+  prices,
+}: EvaluateAlternativesProps): Promise<AlternativesRun> => {
+  const { prepared, shortlist } = item;
+  const rerankNeeded = needsRerank(shortlist);
+  const rerank: RerankResult | null = rerankNeeded
+    ? await rerankAlternatives({
+        client,
+        model,
+        homeProfile: prepared.homeProfile,
+        candidate: prepared.candidate,
+        shortlist,
+      })
+    : null;
+  const chosenB = chooseAlternatives(shortlist, rerank).map((a) => a.species_id);
+  const usage = rerank?.usage ?? null;
+  const inputTokens = usage?.inputTokens ?? null;
+  const outputTokens = usage?.outputTokens ?? null;
+  return {
+    a: modeRun(
+      shortlist.slice(0, MAX_ALTERNATIVES).map((a) => a.species.id),
+      shortlist,
+      prepared
+    ),
+    b: {
+      ...modeRun(chosenB, shortlist, prepared),
+      rerank_called: rerankNeeded,
+      fallback: rerankNeeded && !(rerank?.ok && rerank.picks.length >= MIN_VALID_PICKS),
+      failure: rerank && !rerank.ok ? rerank.failure : null,
+      valid_picks: rerank?.ok ? rerank.picks.length : 0,
+      invalid_picks: rerank?.ok ? rerank.invalidPicks : 0,
+      input_tokens: inputTokens,
+      output_tokens: outputTokens,
+      latency_ms: usage?.latencyMs ?? null,
+      cost: runCost(prices, model, inputTokens, outputTokens),
+    },
+  };
+};
+
+export type AlternativesCaseResult = {
+  id: string;
+  shortlist_size: number;
+  runs: AlternativesRun[];
+};
+
+export const executeAlternatives = async ({
+  client,
+  model,
+  items,
+  runs,
+  concurrency,
+  prices,
+}: {
+  client: OpenRouter;
+  model: string;
+  items: PreparedAlternatives[];
+  runs: number;
+  concurrency: number;
+  prices: Prices;
+}): Promise<AlternativesCaseResult[]> => {
+  const jobs = items.flatMap((item) => Array.from({ length: runs }, () => item));
+  const results = await runPool(jobs, concurrency, (item) =>
+    evaluateAlternatives({ client, model, item, prices })
+  );
+  return items.map((item, i) => ({
+    id: item.prepared.case.id,
+    shortlist_size: item.shortlist.length,
+    runs: results.slice(i * runs, (i + 1) * runs),
+  }));
+};
+
+const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
+
+type ModeSummary = {
+  avg_alternatives: number;
+  mean_similarity: number | null; // over every returned plant
+  hard_filter_violations: number; // must be 0
+};
+
+// Cost, tokens or latency of the re-rank, averaged over the checks that made the call
+// (per_rerank_call) and over every check, those without a call counting as 0 (per_check).
+type Extra = {
+  input_tokens: number | null;
+  output_tokens: number | null;
+  cost: number | null;
+  latency_ms: number | null;
+};
+
+export type AlternativesSummary = {
+  runs: number;
+  a: ModeSummary;
+  b: ModeSummary & {
+    rerank_calls: number;
+    no_rerank_needed: number; // shortlist of 3 or fewer: the SQL top 3, no model call
+    invalid_pick_rate: number | null; // of the picks the model returned in answered calls
+    fallback_rate: number | null; // of the re-rank calls
+    failures: Partial<Record<FitCheckFailure, number>>;
+    per_rerank_call: Extra;
+    per_check: Extra;
+  };
+};
+
+export const summarizeAlternatives = (runs: AlternativesRun[]): AlternativesSummary => {
+  const total = runs.length;
+  const mode = (pick: (r: AlternativesRun) => AlternativesModeRun): ModeSummary => {
+    const parts = runs.map(pick);
+    const similarities = parts.flatMap((p) => p.similarities);
+    return {
+      avg_alternatives: total ? sum(parts.map((p) => p.species_ids.length)) / total : 0,
+      mean_similarity: similarities.length ? sum(similarities) / similarities.length : null,
+      hard_filter_violations: sum(parts.map((p) => p.violations.length)),
+    };
+  };
+
+  const called = runs.filter((r) => r.b.rerank_called);
+  const answered = called.filter((r) => r.b.failure === null);
+  const picksReturned = sum(answered.map((r) => r.b.valid_picks + r.b.invalid_picks));
+  const failures: AlternativesSummary['b']['failures'] = {};
+  for (const r of called) {
+    if (r.b.failure) failures[r.b.failure] = (failures[r.b.failure] ?? 0) + 1;
+  }
+
+  const knownSum = (values: (number | null)[]) =>
+    sum(values.filter((v): v is number => v !== null));
+  const perCall = (pick: (r: AlternativesRun) => number | null): number | null => {
+    const values = called.map(pick).filter((v): v is number => v !== null);
+    return values.length ? sum(values) / values.length : null;
+  };
+  // A cost is only known when every call had one (an unlisted model has none).
+  const perCheckCost = (): number | null => {
+    const costs = called.map((r) => r.b.cost);
+    if (!costs.length) return 0;
+    return costs.every((c) => c !== null) && total ? knownSum(costs) / total : null;
+  };
+
+  return {
+    runs: total,
+    a: mode((r) => r.a),
+    b: {
+      ...mode((r) => r.b),
+      rerank_calls: called.length,
+      no_rerank_needed: total - called.length,
+      invalid_pick_rate: picksReturned
+        ? sum(answered.map((r) => r.b.invalid_picks)) / picksReturned
+        : null,
+      fallback_rate: called.length
+        ? called.filter((r) => r.b.fallback).length / called.length
+        : null,
+      failures,
+      per_rerank_call: {
+        input_tokens: perCall((r) => r.b.input_tokens),
+        output_tokens: perCall((r) => r.b.output_tokens),
+        cost: perCall((r) => r.b.cost),
+        latency_ms: perCall((r) => r.b.latency_ms),
+      },
+      per_check: {
+        input_tokens: total ? knownSum(called.map((r) => r.b.input_tokens)) / total : null,
+        output_tokens: total ? knownSum(called.map((r) => r.b.output_tokens)) / total : null,
+        cost: perCheckCost(),
+        latency_ms: total ? knownSum(called.map((r) => r.b.latency_ms)) / total : null,
+      },
+    },
+  };
+};
+
+const dollars = (x: number | null) => (x === null ? 'n/a' : `$${x.toFixed(5)}`);
+
+export const formatAlternativesReport = (
+  model: string,
+  s: AlternativesSummary,
+  skippedCases: string[]
+) => {
+  const mode = (m: ModeSummary) => [
+    num(m.avg_alternatives, 2),
+    num(m.mean_similarity, 2),
+    String(m.hard_filter_violations),
+  ];
+  const rows: [string, string, string][] = [
+    ['', 'A (SQL top 3)', 'B (re-rank)'],
+    ['avg alternatives', mode(s.a)[0], mode(s.b)[0]],
+    ['mean similarity', mode(s.a)[1], mode(s.b)[1]],
+    ['hard-filter violations', mode(s.a)[2], mode(s.b)[2]],
+  ];
+  const widths = [0, 1, 2].map((i) => Math.max(...rows.map((r) => r[i].length)));
+  const table = rows.map((r) =>
+    r
+      .map((cell, i) => cell.padEnd(widths[i]))
+      .join('  ')
+      .trimEnd()
+  );
+
+  const b = s.b;
+  const pctOrNa = (x: number | null) => (x === null ? 'n/a' : pct(x));
+  const extra = (label: string, e: Extra) =>
+    `  ${label}: ${num(e.input_tokens)} in / ${num(e.output_tokens)} out tokens, ${dollars(e.cost)}, ${num(e.latency_ms)} ms`;
+  const lines = [
+    `model ${model}, ${s.runs} run(s) on cases with a catalog candidate`,
+    '',
+    ...table,
+    '',
+    `re-rank calls ${b.rerank_calls}, skipped (shortlist of 3 or fewer) ${b.no_rerank_needed}`,
+    `invalid-pick rate ${pctOrNa(b.invalid_pick_rate)}, fallback rate ${pctOrNa(b.fallback_rate)}`,
+  ];
+  if (Object.keys(b.failures).length) lines.push(`failures by type ${JSON.stringify(b.failures)}`);
+  lines.push(
+    'extra for B (latency runs in parallel with the fit check):',
+    extra('per re-rank call', b.per_rerank_call),
+    extra('per check', b.per_check)
+  );
+  if (skippedCases.length) {
+    lines.push('', `Not compared (candidate not in the catalog): ${skippedCases.join(', ')}`);
+  }
+  return lines.join('\n');
 };

@@ -1,4 +1,5 @@
-// Fit-check eval runner: `pnpm eval:fit-check [--model <slug>] [--runs <n>] [--case <id>]`.
+// Fit-check eval runner: `pnpm eval:fit-check [--model <slug>] [--runs <n>] [--case <id>]`, and
+// `pnpm eval:fit-check --alternatives` for the stage A vs. stage B comparison of the alternatives.
 // Makes live model calls, which cost money. Nothing in `pnpm test` runs this file.
 import { createClient, type Client } from '@libsql/client';
 import { OpenRouter } from '@openrouter/sdk';
@@ -6,17 +7,25 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { DEFAULT_FIT_CHECK_MODEL } from '../../src/lib/server/ai/fit-check';
 import { PROMPT_VERSION } from '../../src/lib/server/ai/fit-check-prompt';
+import { RERANK_SHORTLIST_SIZE } from '../../src/lib/server/ai/rerank-alternatives';
+import { RERANK_PROMPT_VERSION } from '../../src/lib/server/ai/rerank-prompt';
 import { runMigrations } from '../../src/lib/server/migrate';
+import { getAlternatives } from '../../src/lib/server/queries/alternatives';
 import { findSpeciesByName } from '../../src/lib/server/queries/catalog';
 import {
   buildHomeProfile,
+  executeAlternatives,
   executeCases,
   failingCases,
+  formatAlternativesReport,
   formatReport,
   parseCases,
   parseEvalArgs,
   summarize,
+  summarizeAlternatives,
+  type EvalArgs,
   type EvalCase,
+  type PreparedAlternatives,
   type PreparedCase,
   type Prices,
 } from './score';
@@ -121,29 +130,19 @@ const prepareCase = async (db: Client, c: EvalCase): Promise<PreparedCase> => {
   };
 };
 
-const main = async () => {
-  const args = parseEvalArgs(process.argv.slice(2), DEFAULT_FIT_CHECK_MODEL);
+const resultsPath = (model: string) =>
+  join(resultsDir, `${new Date().toISOString().slice(0, 10)}-${model.replaceAll('/', '_')}.json`);
 
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    throw new Error('OPENROUTER_API_KEY is not set (run through `pnpm eval:fit-check`)');
-  }
-
-  let cases = parseCases(await readJson(casesPath));
-  if (args.caseId) {
-    cases = cases.filter((c) => c.id === args.caseId);
-    if (!cases.length) throw new Error(`no case with id "${args.caseId}"`);
-  }
-
-  const db = createClient({ url: ':memory:' });
-  await runMigrations(db);
-  const catalogRows = await loadCatalog(db);
-  const prepared = await Promise.all(cases.map((c) => prepareCase(db, c)));
-
+// The fit-check part of the eval: every case, `runs` times, scored and written to the results file.
+const runFitCheckEval = async (
+  args: EvalArgs,
+  client: OpenRouter,
+  cases: EvalCase[],
+  prepared: PreparedCase[]
+) => {
   console.log(
-    `Running ${cases.length} case(s) x ${args.runs} run(s) on ${args.model} (${catalogRows} catalog rows, prompt ${PROMPT_VERSION})...`
+    `Running ${cases.length} case(s) x ${args.runs} run(s) on ${args.model} (prompt ${PROMPT_VERSION})...`
   );
-  const client = new OpenRouter({ apiKey });
   const results = await executeCases({
     client,
     model: args.model,
@@ -161,14 +160,119 @@ const main = async () => {
     console.log('\n--case run: results file not written.');
     return;
   }
-  const date = new Date().toISOString().slice(0, 10);
-  const file = join(resultsDir, `${date}-${args.model.replaceAll('/', '_')}.json`);
+  const file = resultsPath(args.model);
   await mkdir(resultsDir, { recursive: true });
   await writeFile(
     file,
     `${JSON.stringify({ model: args.model, prompt_version: PROMPT_VERSION, runs: args.runs, summary, cases: results }, null, 2)}\n`
   );
   console.log(`\nWrote ${file}`);
+};
+
+// The alternatives part: stage A against stage B for every case with a catalog candidate. It does
+// not repeat the fit-check calls; it adds an `alternatives` key (and the re-rank prompt version)
+// to today's results file for this model, so that file has to exist already.
+const runAlternativesEval = async (
+  args: EvalArgs,
+  db: Client,
+  client: OpenRouter,
+  prepared: PreparedCase[]
+) => {
+  const file = resultsPath(args.model);
+  let existing: Record<string, unknown> | null = null;
+  if (!args.caseId) {
+    try {
+      existing = (await readJson(file)) as Record<string, unknown>;
+    } catch {
+      throw new Error(
+        `${file} not found or unreadable. Run \`pnpm eval:fit-check\` first today, then add the alternatives to it.`
+      );
+    }
+  }
+
+  const items: PreparedAlternatives[] = [];
+  const skipped: string[] = [];
+  for (const p of prepared) {
+    if (typeof p.candidate === 'string') {
+      skipped.push(p.case.id);
+      continue;
+    }
+    const shortlist = await getAlternatives({
+      db,
+      homeProfile: p.homeProfile,
+      candidate: p.candidate,
+      excludeSpeciesIds: p.ownedPlants.flatMap((o) => (o.species ? [o.species.id] : [])),
+      limit: RERANK_SHORTLIST_SIZE,
+    });
+    items.push({ prepared: { ...p, candidate: p.candidate }, shortlist });
+  }
+  if (!items.length) throw new Error('no selected case has a candidate in the catalog');
+
+  console.log(
+    `Comparing alternatives for ${items.length} case(s) x ${args.runs} run(s) on ${args.model} (re-rank prompt ${RERANK_PROMPT_VERSION})...`
+  );
+  const results = await executeAlternatives({
+    client,
+    model: args.model,
+    items,
+    runs: args.runs,
+    concurrency: CONCURRENCY,
+    prices: PRICES,
+  });
+  const summary = summarizeAlternatives(results.flatMap((r) => r.runs));
+  console.log(`\n${formatAlternativesReport(args.model, summary, skipped)}`);
+
+  if (!existing) {
+    console.log('\n--case run: results file not written.');
+    return;
+  }
+  const { model, prompt_version, runs, summary: fitSummary, cases, ...rest } = existing;
+  await writeFile(
+    file,
+    `${JSON.stringify(
+      {
+        model,
+        prompt_version,
+        rerank_prompt_version: RERANK_PROMPT_VERSION,
+        runs,
+        summary: fitSummary,
+        cases,
+        ...rest,
+        alternatives: { runs: args.runs, summary, cases: results, skipped_cases: skipped },
+      },
+      null,
+      2
+    )}\n`
+  );
+  console.log(`\nAdded the alternatives comparison to ${file}`);
+};
+
+const main = async () => {
+  const args = parseEvalArgs(process.argv.slice(2), DEFAULT_FIT_CHECK_MODEL);
+
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENROUTER_API_KEY is not set (run through `pnpm eval:fit-check`)');
+  }
+
+  let cases = parseCases(await readJson(casesPath));
+  if (args.caseId) {
+    cases = cases.filter((c) => c.id === args.caseId);
+    if (!cases.length) throw new Error(`no case with id "${args.caseId}"`);
+  }
+
+  const db = createClient({ url: ':memory:' });
+  await runMigrations(db);
+  const catalogRows = await loadCatalog(db);
+  console.log(`Catalog: ${catalogRows} rows.`);
+  const prepared = await Promise.all(cases.map((c) => prepareCase(db, c)));
+
+  const client = new OpenRouter({ apiKey });
+  if (args.alternatives) {
+    await runAlternativesEval(args, db, client, prepared);
+  } else {
+    await runFitCheckEval(args, client, cases, prepared);
+  }
 };
 
 // Exit 0 after a completed run whatever the scores; non-zero only for setup errors.

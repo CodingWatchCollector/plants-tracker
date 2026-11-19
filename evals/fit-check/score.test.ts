@@ -2,12 +2,17 @@ import type { OpenRouter } from '@openrouter/sdk';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import type { FitCheckOutcome } from '../../src/lib/server/ai/fit-check';
+import type { Alternative } from '../../src/lib/server/queries/alternatives';
 import type { FitCheckResponse, PlantSpecies } from '../../src/lib/types';
 import {
   buildHomeProfile,
+  evaluateAlternatives,
+  executeAlternatives,
   executeCases,
   failingCases,
+  formatAlternativesReport,
   formatReport,
+  hardFilterViolations,
   parseCases,
   parseEvalArgs,
   percentile,
@@ -15,7 +20,10 @@ import {
   runPool,
   scoreRun,
   summarize,
+  summarizeAlternatives,
+  type AlternativesRun,
   type EvalCase,
+  type PreparedAlternatives,
   type PreparedCase,
   type Prices,
   type RunScore,
@@ -418,6 +426,7 @@ describe('parseEvalArgs', () => {
       model: 'default/model',
       runs: 3,
       caseId: null,
+      alternatives: false,
     });
   });
 
@@ -426,12 +435,367 @@ describe('parseEvalArgs', () => {
       model: 'x/y',
       runs: 5,
       caseId: 'a-case',
+      alternatives: false,
     });
   });
 
-  it('rejects a bad --runs and unknown flags (--alternatives waits for step 19)', () => {
+  it('reads --alternatives as a switch', () => {
+    expect(parseEvalArgs(['--alternatives'], 'd').alternatives).toBe(true);
+  });
+
+  it('rejects a bad --runs and unknown flags', () => {
     expect(() => parseEvalArgs(['--runs', '0'], 'd')).toThrow(/positive integer/);
     expect(() => parseEvalArgs(['--runs', 'abc'], 'd')).toThrow(/positive integer/);
-    expect(() => parseEvalArgs(['--alternatives'], 'd')).toThrow();
+    expect(() => parseEvalArgs(['--bogus'], 'd')).toThrow();
+  });
+});
+
+describe('alternatives comparison', () => {
+  const plant = (id: number, overrides: Partial<PlantSpecies> = {}): PlantSpecies => ({
+    id,
+    scientific_name: `Plantus ${id}`,
+    common_name: `Plant ${id}`,
+    aliases: [],
+    watering_interval_days: 7,
+    drought_tolerance: 'medium',
+    care_level: 'low',
+    light_needs: 'low',
+    toxic_to_cats: false,
+    toxic_to_dogs: false,
+    toxicity_notes: null,
+    growth_habit: 'climbing',
+    leaf_size: 'large',
+    leaf_shape: 'lobed',
+    variegated: false,
+    care_tips: null,
+    source: 'seed',
+    source_url: null,
+    reviewed_at: '2026-01-01',
+    ...overrides,
+  });
+  const alt = (id: number, overrides: Partial<PlantSpecies> = {}, similarity = 7): Alternative => ({
+    species: plant(id, overrides),
+    similarity,
+    explanation: `Templated ${id}.`,
+  });
+  const shortlistOf = (n: number) => Array.from({ length: n }, (_, i) => alt(i + 1));
+
+  const candidate = plant(100);
+  const profile = evalCase().profile; // a cat home, medium care, medium light
+  const item = (shortlist: Alternative[], owned: PlantSpecies[] = []): PreparedAlternatives => {
+    const c = evalCase();
+    return {
+      prepared: {
+        case: c,
+        homeProfile: buildHomeProfile(c),
+        ownedPlants: owned.map((species) => ({ name: species.common_name, species })),
+        candidate,
+      },
+      shortlist,
+    };
+  };
+
+  const pickResult = (...ids: number[]) => ({
+    choices: [
+      {
+        index: 0,
+        finishReason: 'stop',
+        message: {
+          role: 'assistant',
+          content: JSON.stringify({
+            picks: ids.map((species_id) => ({ species_id, reason: `Reason ${species_id}.` })),
+          }),
+          refusal: null,
+        },
+      },
+    ],
+    usage: { promptTokens: 900, completionTokens: 80 },
+  });
+  const fakeClient = (send: ReturnType<typeof vi.fn>) =>
+    ({ chat: { send } }) as unknown as OpenRouter;
+  const evaluate = (send: ReturnType<typeof vi.fn>, it: PreparedAlternatives) =>
+    evaluateAlternatives({
+      client: fakeClient(send),
+      model: 'some/model',
+      item: it,
+      prices: PRICES,
+    });
+
+  describe('hardFilterViolations', () => {
+    const check = (overrides: Partial<PlantSpecies>, p = profile, owned: number[] = []) =>
+      hardFilterViolations(p, candidate, owned, alt(1, overrides));
+
+    it('allows a safe plant that suits the home', () => {
+      expect(check({})).toEqual([]);
+    });
+
+    it('flags the candidate and an owned plant', () => {
+      expect(hardFilterViolations(profile, candidate, [], alt(100))).toEqual(['is the candidate']);
+      expect(check({}, profile, [1])).toEqual(['already owned']);
+    });
+
+    it('flags toxicity for the pets the home has, and for small kids', () => {
+      expect(check({ toxic_to_cats: true })).toEqual(['toxic to cats']);
+      expect(check({ toxic_to_dogs: true })).toEqual([]); // a cat home only
+      expect(check({ toxic_to_dogs: true }, { ...profile, has_dogs: true })).toEqual([
+        'toxic to dogs',
+      ]);
+      expect(
+        check({ toxic_to_dogs: true }, { ...profile, has_cats: false, has_small_kids: true })
+      ).toEqual(['toxic (small kids)']);
+    });
+
+    it('flags care and light above what the home offers', () => {
+      expect(check({ care_level: 'high' })).toEqual(['care level above commitment']);
+      expect(check({ light_needs: 'bright' })).toEqual(['light needs above home light']);
+      expect(check({ care_level: 'medium', light_needs: 'medium' })).toEqual([]);
+    });
+
+    it('flags low drought tolerance only for a home that travels', () => {
+      expect(check({ drought_tolerance: 'low' })).toEqual([]);
+      expect(check({ drought_tolerance: 'low' }, { ...profile, travels_often: true })).toEqual([
+        'low drought tolerance for a home that travels',
+      ]);
+    });
+
+    it('flags a similarity below the minimum', () => {
+      expect(hardFilterViolations(profile, candidate, [], alt(1, {}, 2))).toEqual([
+        'similarity below minimum',
+      ]);
+    });
+  });
+
+  describe('evaluateAlternatives', () => {
+    it('compares the SQL top 3 with the model picks, using the same fallback rules', async () => {
+      const send = vi.fn().mockResolvedValue(pickResult(4, 2));
+      const run = await evaluate(send, item(shortlistOf(5)));
+      expect(run.a).toMatchObject({ species_ids: [1, 2, 3], similarities: [7, 7, 7] });
+      expect(run.b).toMatchObject({
+        species_ids: [4, 2],
+        rerank_called: true,
+        fallback: false,
+        failure: null,
+        valid_picks: 2,
+        invalid_picks: 0,
+        input_tokens: 900,
+        output_tokens: 80,
+        violations: [],
+      });
+      expect(run.b.cost).toBeCloseTo(0.0013);
+      expect(run.b.latency_ms).not.toBeNull();
+      expect(send).toHaveBeenCalledTimes(1);
+    });
+
+    it('counts picks outside the shortlist as invalid', async () => {
+      const run = await evaluate(
+        vi.fn().mockResolvedValue(pickResult(99, 2, 3)),
+        item(shortlistOf(5))
+      );
+      expect(run.b).toMatchObject({ species_ids: [2, 3], invalid_picks: 1, fallback: false });
+    });
+
+    it('falls back to the SQL top 3 when fewer than 2 picks are valid', async () => {
+      const run = await evaluate(vi.fn().mockResolvedValue(pickResult(4)), item(shortlistOf(5)));
+      expect(run.b).toMatchObject({ species_ids: [1, 2, 3], fallback: true, valid_picks: 1 });
+    });
+
+    it('falls back and records the failure when the re-rank call fails', async () => {
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const run = await evaluate(
+        vi.fn().mockRejectedValue(new Error('network down')),
+        item(shortlistOf(5))
+      );
+      errorSpy.mockRestore();
+      expect(run.b).toMatchObject({
+        species_ids: [1, 2, 3],
+        fallback: true,
+        failure: 'provider_error',
+        input_tokens: null,
+        cost: null,
+      });
+    });
+
+    it('makes no model call for a shortlist of 3 or fewer, and that is not a fallback', async () => {
+      const send = vi.fn();
+      const run = await evaluate(send, item(shortlistOf(3)));
+      expect(send).not.toHaveBeenCalled();
+      expect(run.b).toMatchObject({
+        species_ids: [1, 2, 3],
+        rerank_called: false,
+        fallback: false,
+        cost: null,
+      });
+    });
+
+    it('records hard-filter violations in either stage', async () => {
+      const list = [alt(1, { toxic_to_cats: true }), ...shortlistOf(5).slice(1)];
+      const run = await evaluate(vi.fn().mockResolvedValue(pickResult(1, 2)), item(list));
+      expect(run.a.violations).toEqual(['1: toxic to cats']);
+      expect(run.b.violations).toEqual(['1: toxic to cats']);
+    });
+
+    it('flags a plant the home already owns', async () => {
+      const run = await evaluate(
+        vi.fn().mockResolvedValue(pickResult(2, 3)),
+        item(shortlistOf(5), [plant(2)])
+      );
+      expect(run.b.violations).toEqual(['2: already owned']);
+    });
+  });
+
+  describe('executeAlternatives', () => {
+    it('runs each case the requested number of times and groups the runs', async () => {
+      const send = vi.fn().mockResolvedValue(pickResult(4, 2));
+      const results = await executeAlternatives({
+        client: fakeClient(send),
+        model: 'some/model',
+        items: [item(shortlistOf(5)), item(shortlistOf(3))],
+        runs: 3,
+        concurrency: 4,
+        prices: PRICES,
+      });
+      expect(results.map((r) => [r.id, r.shortlist_size, r.runs.length])).toEqual([
+        ['a-case', 5, 3],
+        ['a-case', 3, 3],
+      ]);
+      expect(send).toHaveBeenCalledTimes(3); // the short shortlist makes no call
+    });
+  });
+
+  describe('summarizeAlternatives', () => {
+    const modeRun = (ids: number[], similarity = 7, violations: string[] = []) => ({
+      species_ids: ids,
+      similarities: ids.map(() => similarity),
+      violations,
+    });
+    const altRun = (
+      b: Partial<AlternativesRun['b']> = {},
+      a = modeRun([1, 2, 3])
+    ): AlternativesRun => ({
+      a,
+      b: {
+        ...modeRun([4, 2]),
+        rerank_called: true,
+        fallback: false,
+        failure: null,
+        valid_picks: 2,
+        invalid_picks: 0,
+        input_tokens: 1000,
+        output_tokens: 100,
+        latency_ms: 400,
+        cost: 0.0015,
+        ...b,
+      },
+    });
+
+    it('reports per-mode counts, similarity and violations', () => {
+      const s = summarizeAlternatives([
+        altRun({}, modeRun([1, 2, 3], 6)),
+        altRun({ ...modeRun([4, 2, 5], 8, ['4: toxic to cats']), valid_picks: 3 }),
+      ]);
+      expect(s.runs).toBe(2);
+      expect(s.a).toEqual({ avg_alternatives: 3, mean_similarity: 6.5, hard_filter_violations: 0 });
+      expect(s.b.avg_alternatives).toBe(2.5);
+      expect(s.b.mean_similarity).toBeCloseTo(7.6);
+      expect(s.b.hard_filter_violations).toBe(1);
+    });
+
+    it('reports invalid-pick, fallback and failure rates over the re-rank calls', () => {
+      const s = summarizeAlternatives([
+        altRun({ valid_picks: 2, invalid_picks: 1 }),
+        altRun({ fallback: true, valid_picks: 1, invalid_picks: 1, ...modeRun([1, 2, 3]) }),
+        altRun({ fallback: true, failure: 'refused', valid_picks: 0, ...modeRun([1, 2, 3]) }),
+        altRun({
+          rerank_called: false,
+          input_tokens: null,
+          output_tokens: null,
+          latency_ms: null,
+          cost: null,
+        }),
+      ]);
+      expect(s.b.rerank_calls).toBe(3);
+      expect(s.b.no_rerank_needed).toBe(1);
+      expect(s.b.invalid_pick_rate).toBeCloseTo(2 / 5); // answered calls: 3 + 2 picks returned
+      expect(s.b.fallback_rate).toBeCloseTo(2 / 3);
+      expect(s.b.failures).toEqual({ refused: 1 });
+    });
+
+    it('averages the extra cost per call and per check, skipped checks counting as 0', () => {
+      const s = summarizeAlternatives([
+        altRun(),
+        altRun({ input_tokens: 3000, output_tokens: 300, latency_ms: 800, cost: 0.0045 }),
+        altRun({
+          rerank_called: false,
+          input_tokens: null,
+          output_tokens: null,
+          latency_ms: null,
+          cost: null,
+        }),
+        altRun({
+          rerank_called: false,
+          input_tokens: null,
+          output_tokens: null,
+          latency_ms: null,
+          cost: null,
+        }),
+      ]);
+      expect(s.b.per_rerank_call).toEqual({
+        input_tokens: 2000,
+        output_tokens: 200,
+        cost: 0.003,
+        latency_ms: 600,
+      });
+      expect(s.b.per_check.input_tokens).toBe(1000);
+      expect(s.b.per_check.output_tokens).toBe(100);
+      expect(s.b.per_check.cost).toBeCloseTo(0.0015);
+      expect(s.b.per_check.latency_ms).toBe(300);
+    });
+
+    it('has no cost when a called model has no price, and no rates when nothing was called', () => {
+      const unpriced = summarizeAlternatives([altRun({ cost: null })]);
+      expect(unpriced.b.per_check.cost).toBeNull();
+      const none = summarizeAlternatives([
+        altRun({
+          rerank_called: false,
+          input_tokens: null,
+          output_tokens: null,
+          latency_ms: null,
+          cost: null,
+        }),
+      ]);
+      expect(none.b.invalid_pick_rate).toBeNull();
+      expect(none.b.fallback_rate).toBeNull();
+      expect(none.b.per_check.cost).toBe(0);
+      expect(none.b.per_rerank_call.cost).toBeNull();
+    });
+  });
+
+  describe('formatAlternativesReport', () => {
+    it('shows both modes, the B extras and the cases that were not compared', () => {
+      const run: AlternativesRun = {
+        a: { species_ids: [1, 2, 3], similarities: [7, 7, 7], violations: [] },
+        b: {
+          species_ids: [4, 2],
+          similarities: [7, 7],
+          violations: [],
+          rerank_called: true,
+          fallback: false,
+          failure: null,
+          valid_picks: 2,
+          invalid_picks: 0,
+          input_tokens: 1000,
+          output_tokens: 100,
+          latency_ms: 400,
+          cost: 0.0015,
+        },
+      };
+      const text = formatAlternativesReport('x/y', summarizeAlternatives([run]), ['injection-x']);
+      expect(text).toContain('A (SQL top 3)');
+      expect(text).toContain('B (re-rank)');
+      expect(text).toMatch(/hard-filter violations\s+0\s+0/);
+      expect(text).toContain('invalid-pick rate 0.0%, fallback rate 0.0%');
+      expect(text).toContain('per check: 1000 in / 100 out tokens, $0.00150, 400 ms');
+      expect(text).toContain('Not compared (candidate not in the catalog): injection-x');
+    });
   });
 });

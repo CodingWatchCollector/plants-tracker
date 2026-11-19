@@ -201,7 +201,7 @@ Progress markers: `[x]` done and committed, `[~]` written but uncommitted, `[ ]`
 **Day 6: alternatives stage B**
 
 - [x] 18. Model re-rank of the SQL top 10 behind a constant. Details in §6a.
-- [ ] 19. Alternative-quality report in the eval, A vs. B. Details in §6a.
+- [x] 19. Alternative-quality report in the eval, A vs. B. Details in §6a.
 
 **Day 7: buffer + write-up**
 

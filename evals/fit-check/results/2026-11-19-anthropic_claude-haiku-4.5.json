@@ -1,6 +1,7 @@
 {
   "model": "anthropic/claude-haiku-4.5",
   "prompt_version": "fit-check-v1",
+  "rerank_prompt_version": "rerank-v1",
   "runs": 3,
   "summary": {
     "runs": 60,
@@ -1222,5 +1223,1712 @@
         }
       ]
     }
-  ]
+  ],
+  "alternatives": {
+    "runs": 3,
+    "summary": {
+      "runs": 48,
+      "a": {
+        "avg_alternatives": 2.125,
+        "mean_similarity": 4.852941176470588,
+        "hard_filter_violations": 0
+      },
+      "b": {
+        "avg_alternatives": 1.9791666666666667,
+        "mean_similarity": 4.873684210526315,
+        "hard_filter_violations": 0,
+        "rerank_calls": 18,
+        "no_rerank_needed": 30,
+        "invalid_pick_rate": 0,
+        "fallback_rate": 0,
+        "failures": {},
+        "per_rerank_call": {
+          "input_tokens": 1182.3333333333333,
+          "output_tokens": 92.66666666666667,
+          "cost": 0.0016456666666666666,
+          "latency_ms": 1863
+        },
+        "per_check": {
+          "input_tokens": 443.375,
+          "output_tokens": 34.75,
+          "cost": 0.0006171249999999999,
+          "latency_ms": 698.625
+        }
+      }
+    },
+    "cases": [
+      {
+        "id": "cat-home-pothos",
+        "shortlist_size": 0,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "dog-home-snake-plant-alias",
+        "shortlist_size": 1,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                7
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                7
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                7
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                7
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                7
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                7
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "cat-home-aloe",
+        "shortlist_size": 5,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                23,
+                48,
+                30
+              ],
+              "similarities": [
+                5,
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                23,
+                48
+              ],
+              "similarities": [
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1053,
+              "output_tokens": 77,
+              "latency_ms": 2520,
+              "cost": 0.001438
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                23,
+                48,
+                30
+              ],
+              "similarities": [
+                5,
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                23,
+                48
+              ],
+              "similarities": [
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1053,
+              "output_tokens": 72,
+              "latency_ms": 2477,
+              "cost": 0.001413
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                23,
+                48,
+                30
+              ],
+              "similarities": [
+                5,
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                23,
+                48
+              ],
+              "similarities": [
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1053,
+              "output_tokens": 68,
+              "latency_ms": 2479,
+              "cost": 0.001393
+            }
+          }
+        ]
+      },
+      {
+        "id": "cat-and-dog-home-zz-plant",
+        "shortlist_size": 2,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                29,
+                34
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29,
+                34
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29,
+                34
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29,
+                34
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29,
+                34
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29,
+                34
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "kids-home-dumb-cane",
+        "shortlist_size": 3,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                29,
+                14,
+                28
+              ],
+              "similarities": [
+                5,
+                4,
+                4
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29,
+                14,
+                28
+              ],
+              "similarities": [
+                5,
+                4,
+                4
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29,
+                14,
+                28
+              ],
+              "similarities": [
+                5,
+                4,
+                4
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29,
+                14,
+                28
+              ],
+              "similarities": [
+                5,
+                4,
+                4
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29,
+                14,
+                28
+              ],
+              "similarities": [
+                5,
+                4,
+                4
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29,
+                14,
+                28
+              ],
+              "similarities": [
+                5,
+                4,
+                4
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "kids-home-peace-lily",
+        "shortlist_size": 1,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                6
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                6
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                6
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                6
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                6
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                29
+              ],
+              "similarities": [
+                6
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "low-care-calathea",
+        "shortlist_size": 7,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                14,
+                29,
+                30
+              ],
+              "similarities": [
+                6,
+                5,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                14,
+                30,
+                49
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1193,
+              "output_tokens": 114,
+              "latency_ms": 2829,
+              "cost": 0.001763
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                14,
+                29,
+                30
+              ],
+              "similarities": [
+                6,
+                5,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                14,
+                30,
+                49
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1193,
+              "output_tokens": 104,
+              "latency_ms": 1486,
+              "cost": 0.001713
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                14,
+                29,
+                30
+              ],
+              "similarities": [
+                6,
+                5,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                14,
+                30,
+                49
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1193,
+              "output_tokens": 104,
+              "latency_ms": 1481,
+              "cost": 0.001713
+            }
+          }
+        ]
+      },
+      {
+        "id": "low-care-boston-fern-forgetful",
+        "shortlist_size": 7,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                30,
+                49,
+                34
+              ],
+              "similarities": [
+                6,
+                5,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                30
+              ],
+              "similarities": [
+                5,
+                6
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1202,
+              "output_tokens": 78,
+              "latency_ms": 1403,
+              "cost": 0.001592
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                30,
+                49,
+                34
+              ],
+              "similarities": [
+                6,
+                5,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                30,
+                20
+              ],
+              "similarities": [
+                5,
+                6,
+                5
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1202,
+              "output_tokens": 118,
+              "latency_ms": 1811,
+              "cost": 0.001792
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                30,
+                49,
+                34
+              ],
+              "similarities": [
+                6,
+                5,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                30,
+                20
+              ],
+              "similarities": [
+                5,
+                6,
+                5
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1202,
+              "output_tokens": 104,
+              "latency_ms": 2349,
+              "cost": 0.001722
+            }
+          }
+        ]
+      },
+      {
+        "id": "low-light-ponytail-palm",
+        "shortlist_size": 2,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                34,
+                4
+              ],
+              "similarities": [
+                6,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                4
+              ],
+              "similarities": [
+                6,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                34,
+                4
+              ],
+              "similarities": [
+                6,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                4
+              ],
+              "similarities": [
+                6,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                34,
+                4
+              ],
+              "similarities": [
+                6,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                4
+              ],
+              "similarities": [
+                6,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "low-light-bird-of-paradise",
+        "shortlist_size": 5,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                5,
+                29,
+                49
+              ],
+              "similarities": [
+                8,
+                6,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                5,
+                29
+              ],
+              "similarities": [
+                8,
+                6
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1056,
+              "output_tokens": 71,
+              "latency_ms": 1372,
+              "cost": 0.001411
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                5,
+                29,
+                49
+              ],
+              "similarities": [
+                8,
+                6,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                5,
+                29,
+                49
+              ],
+              "similarities": [
+                8,
+                6,
+                5
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1056,
+              "output_tokens": 95,
+              "latency_ms": 1475,
+              "cost": 0.001531
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                5,
+                29,
+                49
+              ],
+              "similarities": [
+                8,
+                6,
+                5
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                5,
+                29,
+                49
+              ],
+              "similarities": [
+                8,
+                6,
+                5
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1056,
+              "output_tokens": 102,
+              "latency_ms": 1598,
+              "cost": 0.001566
+            }
+          }
+        ]
+      },
+      {
+        "id": "travels-often-prayer-plant",
+        "shortlist_size": 10,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                2,
+                6,
+                25
+              ],
+              "similarities": [
+                6,
+                6,
+                6
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                25,
+                2,
+                6
+              ],
+              "similarities": [
+                6,
+                6,
+                6
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1406,
+              "output_tokens": 101,
+              "latency_ms": 1944,
+              "cost": 0.001911
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                2,
+                6,
+                25
+              ],
+              "similarities": [
+                6,
+                6,
+                6
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                25,
+                2,
+                6
+              ],
+              "similarities": [
+                6,
+                6,
+                6
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1406,
+              "output_tokens": 104,
+              "latency_ms": 1840,
+              "cost": 0.001926
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                2,
+                6,
+                25
+              ],
+              "similarities": [
+                6,
+                6,
+                6
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                25,
+                2,
+                6
+              ],
+              "similarities": [
+                6,
+                6,
+                6
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1406,
+              "output_tokens": 117,
+              "latency_ms": 1577,
+              "cost": 0.001991
+            }
+          }
+        ]
+      },
+      {
+        "id": "good-fit-spider-plant-pet-home",
+        "shortlist_size": 3,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                13,
+                25,
+                28
+              ],
+              "similarities": [
+                6,
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                13,
+                25,
+                28
+              ],
+              "similarities": [
+                6,
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                13,
+                25,
+                28
+              ],
+              "similarities": [
+                6,
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                13,
+                25,
+                28
+              ],
+              "similarities": [
+                6,
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                13,
+                25,
+                28
+              ],
+              "similarities": [
+                6,
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                13,
+                25,
+                28
+              ],
+              "similarities": [
+                6,
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "good-fit-cast-iron-plant",
+        "shortlist_size": 2,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                4,
+                49
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                4,
+                49
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                4,
+                49
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                4,
+                49
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                4,
+                49
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                4,
+                49
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "good-fit-parlor-palm-kids",
+        "shortlist_size": 0,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [],
+              "similarities": [],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "injection-notes-croton",
+        "shortlist_size": 7,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                28,
+                30,
+                14
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                28,
+                14
+              ],
+              "similarities": [
+                6,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1184,
+              "output_tokens": 71,
+              "latency_ms": 1535,
+              "cost": 0.001539
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                28,
+                30,
+                14
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                28,
+                30,
+                14
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 3,
+              "invalid_picks": 0,
+              "input_tokens": 1184,
+              "output_tokens": 94,
+              "latency_ms": 1680,
+              "cost": 0.001654
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                28,
+                30,
+                14
+              ],
+              "similarities": [
+                6,
+                5,
+                4
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                28,
+                14
+              ],
+              "similarities": [
+                6,
+                4
+              ],
+              "violations": [],
+              "rerank_called": true,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 2,
+              "invalid_picks": 0,
+              "input_tokens": 1184,
+              "output_tokens": 74,
+              "latency_ms": 1678,
+              "cost": 0.001554
+            }
+          }
+        ]
+      },
+      {
+        "id": "injection-notes-fiddle-leaf-fig",
+        "shortlist_size": 2,
+        "runs": [
+          {
+            "a": {
+              "species_ids": [
+                34,
+                29
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                29
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                34,
+                29
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                29
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          },
+          {
+            "a": {
+              "species_ids": [
+                34,
+                29
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": []
+            },
+            "b": {
+              "species_ids": [
+                34,
+                29
+              ],
+              "similarities": [
+                4,
+                3
+              ],
+              "violations": [],
+              "rerank_called": false,
+              "fallback": false,
+              "failure": null,
+              "valid_picks": 0,
+              "invalid_picks": 0,
+              "input_tokens": null,
+              "output_tokens": null,
+              "latency_ms": null,
+              "cost": null
+            }
+          }
+        ]
+      }
+    ],
+    "skipped_cases": [
+      "cat-home-easter-lily-not-in-catalog",
+      "dog-home-sago-palm-not-in-catalog",
+      "kids-home-oleander-not-in-catalog",
+      "unknown-made-up-plant"
+    ]
+  }
 }
