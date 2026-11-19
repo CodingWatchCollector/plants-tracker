@@ -205,7 +205,7 @@ Progress markers: `[x]` done and committed, `[~]` written but uncommitted, `[ ]`
 
 **Day 7: buffer + write-up**
 
-- [ ] 20. Fix what the evals surfaced, close the open acceptance items in §7, write `docs/ai-fit-check.md`. Details in §6a.
+- [x] 20. Fix what the evals surfaced, close the open acceptance items in §7, write `docs/ai-fit-check.md`. Details in §6a.
 
 ## 6a. Decisions for the remaining steps
 
