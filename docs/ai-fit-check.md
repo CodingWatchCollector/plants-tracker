@@ -1,6 +1,6 @@
 # AI plant fit check
 
-A home types the name of a plant it is thinking of buying. The app answers with a verdict (`good_fit`, `caution` or `poor_fit`), reasons tied to the household profile and the plants it already owns, warnings such as "toxic to cats", and up to three look-alike plants that suit the home better. Each alternative has an "Add this plant" button that opens the add-plant form pre-filled.
+A home types the name of a plant it is thinking of buying. The app answers with a verdict (`good_fit`, `caution` or `poor_fit`), reasons tied to the household profile and the plants it already owns, warnings such as "toxic to cats", and up to three look-alike plants that suit the home better. Each alternative has an "Add this plant" button that opens the add-plant form pre-filled. The checked plant has one too, whatever the verdict: "Add this plant" on a good fit and "Add anyway" otherwise. A catalog plant opens the form from its catalog row (`?species=<id>`: scientific name and watering interval). A plant outside the catalog opens it with the typed name (`?name=<text>`) and the default interval. The verdict advises, and the choice stays with the user.
 
 This page describes how it works, why the main decisions were made, what the eval measured, and where it falls short.
 

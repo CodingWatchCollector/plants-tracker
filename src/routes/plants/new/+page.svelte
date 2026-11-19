@@ -10,9 +10,19 @@
 
   // ?species=<id> starts the form from a catalog plant (the check page's "Add this plant").
   const speciesId = page.url.searchParams.get('species');
+  // ?name=<text> starts it from a name the user typed, for a plant that is not in the catalog
+  // (the check page's "Add anyway"). ?species wins when both are given.
+  const MAX_NAME_LENGTH = 100;
+  const typedName = speciesId
+    ? ''
+    : (page.url.searchParams.get('name') ?? '').trim().slice(0, MAX_NAME_LENGTH);
 
-  let prefill = $state<Partial<Plant>>({});
-  let prefillNote = $state('');
+  let prefill = $state<Partial<Plant>>(typedName ? { name: typedName } : {});
+  let prefillNote = $state(
+    typedName
+      ? `Started from "${typedName}", which isn't in our plant catalog, so the watering interval is the default. Adjust anything you like.`
+      : ''
+  );
   // PlantForm resets its fields whenever `plant` changes, so only show it once the lookup is
   // done; otherwise a late answer would overwrite what the user has already typed.
   let ready = $state(!speciesId);

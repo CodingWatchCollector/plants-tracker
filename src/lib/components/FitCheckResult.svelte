@@ -18,6 +18,13 @@
     travel: 'Travel',
     other: 'Other',
   };
+
+  // The checked plant itself: a catalog plant opens the form from its catalog row, anything else
+  // with the name the user typed. Whatever the verdict, the choice stays theirs.
+  const addQuery = $derived(
+    result.species_id !== null ? `species=${result.species_id}` : `name=${encodeURIComponent(name)}`
+  );
+  const addLabel = $derived(result.verdict === 'good_fit' ? 'Add this plant' : 'Add anyway');
 </script>
 
 <section class="panel result" aria-label="Plant check result">
@@ -54,6 +61,17 @@
       {/each}
     </ul>
   {/if}
+
+  <div class="add-candidate">
+    <a
+      class="button"
+      class:primary={result.verdict === 'good_fit'}
+      href="{resolve('/plants/new')}?{addQuery}"
+      aria-label="{addLabel}: {name}"
+    >
+      {addLabel}
+    </a>
+  </div>
 
   {#if result.alternatives.length}
     <div class="alternatives">
@@ -142,6 +160,11 @@
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--muted);
+  }
+
+  .add-candidate {
+    display: flex;
+    justify-content: flex-end;
   }
 
   .alternatives {
