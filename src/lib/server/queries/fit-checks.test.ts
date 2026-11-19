@@ -2,6 +2,7 @@ import { createClient, type Client } from '@libsql/client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { runMigrations } from '../migrate';
 import { getFitCheckCountByHomeAndDate, logFitCheck } from './fit-checks';
+import { DAILY_FIT_CHECK_LIMIT } from '../ai/run-fit-check';
 
 let db: Client;
 
@@ -118,8 +119,8 @@ describe('getFitCheckCountByHomeAndDate', () => {
     expect(new Set(Object.keys(args))).toEqual(used);
   });
 
-  it('reaches the quota of 20 and not before', async () => {
-    for (let i = 0; i < 20; i++) await log(1);
-    expect(await getFitCheckCountByHomeAndDate({ db, homeId: 1 })).toBe(20);
+  it(`reaches the quota of ${DAILY_FIT_CHECK_LIMIT} and not before`, async () => {
+    for (let i = 0; i < DAILY_FIT_CHECK_LIMIT; i++) await log(1);
+    expect(await getFitCheckCountByHomeAndDate({ db, homeId: 1 })).toBe(DAILY_FIT_CHECK_LIMIT);
   });
 });

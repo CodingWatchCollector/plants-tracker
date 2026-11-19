@@ -21,7 +21,7 @@ import {
   rerankAlternatives,
 } from './rerank-alternatives';
 
-export const DAILY_FIT_CHECK_LIMIT = 20;
+export const DAILY_FIT_CHECK_LIMIT = 5;
 export const MAX_CANDIDATE_LENGTH = 100;
 
 // sql: the SQL top 3 with templated explanations. rerank: the model picks from the SQL top 10 and
