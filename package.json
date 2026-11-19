@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "db:migrate": "node --env-file=.env.develop scripts/migrate.ts",
     "db:seed": "tsx --env-file .env.develop scripts/seed-catalog.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "eval:fit-check": "tsx --env-file .env.develop evals/fit-check/run.ts"
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.4",

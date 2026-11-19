@@ -226,16 +226,23 @@ type ApplyFitCheckGuardrailProps = {
   homeProfile: HomeProfile;
 };
 
-const PET_WORDS = {
+// Who a toxicity warning is about, and the words that show it names them. 'kids' uses the
+// children regex from the kids rule; the pet entries accept a plain "pets" too.
+const WARNING_SUBJECTS = {
   cats: /\b(cats?|kittens?|felines?|pets?)\b/i,
   dogs: /\b(dogs?|puppy|puppies|canines?|pets?)\b/i,
-};
-const KID_WORDS = /\b(child|children|kids?|toddlers?|bab(y|ies)|people|humans?)\b/i;
+  kids: /\b(child|children|kids?|toddlers?|bab(y|ies)|people|humans?)\b/i,
+} as const;
+export type WarningSubject = keyof typeof WARNING_SUBJECTS;
 const TOXIC_WARNING = /\b(toxic|poisonous)\b/i;
 const NEGATED_WARNING = /\b(non-?toxic|not toxic|not poisonous)\b/i;
 
-const warnsAbout = (warnings: string[], words: RegExp) =>
-  warnings.some((w) => TOXIC_WARNING.test(w) && !NEGATED_WARNING.test(w) && words.test(w));
+// True when one of the warnings is a (non-negated) toxicity warning that names the subject.
+// Shared by the guardrail and the eval scoring, so both judge a warning the same way.
+export const warnsAbout = (warnings: string[], subject: WarningSubject) =>
+  warnings.some(
+    (w) => TOXIC_WARNING.test(w) && !NEGATED_WARNING.test(w) && WARNING_SUBJECTS[subject].test(w)
+  );
 
 // Applies only to catalog candidates, with two rules:
 //   - pets: toxic to a pet the home has, so the verdict can't be good_fit and a toxicity warning
@@ -251,16 +258,16 @@ export const applyFitCheckGuardrail = ({
   if (typeof candidate === 'string') {
     return { response, guardrailFired: false };
   }
-  const exposedPets: (keyof typeof PET_WORDS)[] = [];
+  const exposedPets: ('cats' | 'dogs')[] = [];
   if (homeProfile.has_cats && candidate.toxic_to_cats) exposedPets.push('cats');
   if (homeProfile.has_dogs && candidate.toxic_to_dogs) exposedPets.push('dogs');
 
   const missingWarnings = exposedPets
-    .filter((pet) => !warnsAbout(response.warnings, PET_WORDS[pet]))
+    .filter((pet) => !warnsAbout(response.warnings, pet))
     .map((pet) => `Toxic to ${pet} if ingested.`);
   const exposedKids =
     homeProfile.has_small_kids && (candidate.toxic_to_cats || candidate.toxic_to_dogs);
-  if (exposedKids && !warnsAbout(response.warnings, KID_WORDS)) {
+  if (exposedKids && !warnsAbout(response.warnings, 'kids')) {
     missingWarnings.push('Toxic if eaten; keep out of reach of small children.');
   }
   const verdict =

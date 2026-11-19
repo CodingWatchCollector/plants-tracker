@@ -196,7 +196,7 @@ Progress markers: `[x]` done and committed, `[~]` written but uncommitted, `[ ]`
 **Day 5: evals**
 
 - [x] 16. `evals/fit-check/cases.json`, ~20 cases. Details in §6a.
-- [ ] 17. `evals/fit-check/run.ts` (`pnpm eval:fit-check`), run on Haiku 4.5, results committed. Details in §6a.
+- [x] 17. `evals/fit-check/run.ts` (`pnpm eval:fit-check`), run on Haiku 4.5, results committed. Details in §6a.
 
 **Day 6: alternatives stage B**
 
@@ -271,7 +271,15 @@ Rules for the case set:
 - Cost: `PRICES` table in `run.ts`, `{ 'anthropic/claude-haiku-4.5': { input: 1, output: 5 } }` in $ per 1M tokens. An unknown model → cost `null`, printed as `n/a`.
 - Output: print a summary table (schema pass rate, verdict pass rate, final and raw warning pass rates, guardrail fire rate, avg input/output tokens, avg cost per check, p50/p95 latency) and list every failing case id with its verdicts. Write `evals/fit-check/results/<YYYY-MM-DD>-<model with / replaced by _>.json` with `{ model, prompt_version, runs, summary, cases: [{ id, runs: [...] }] }`.
 - A live run costs money (~20 cases × 3 runs × $0.006 ≈ $0.40). Ask the user before each live run. Unit-test the scoring helpers with a mocked client; no live calls in `pnpm test`.
-- Lint: `evals/**` must pass `pnpm lint`. If `eslint`/`tsconfig` don't cover `evals/`, add it to their include patterns instead of ignoring it.
+- Lint: `evals/**` must pass `pnpm lint`. ESLint and Prettier already cover it. For `pnpm check`, add `'../evals/**/*.ts'` to the generated tsconfig's `include` through `kit.typescript.config` in `svelte.config.js` (don't override `include` in `tsconfig.json`, which would drop the generated entries).
+- Agreed with the implementer (2026-11-18):
+  - `warnsAbout(warnings, 'cats' | 'dogs' | 'kids')` is exported from `fit-check.ts` and looks up its regex by key; the guardrail uses it too.
+  - Layout: pure scoring and aggregation in `evals/fit-check/score.ts` with `score.test.ts` next to it; `run.ts` holds the CLI, the in-memory DB setup, the client and the pool.
+  - `run.ts` has its own `INSERT` for the seed rows (`scripts/seed-catalog.ts` connects to Turso on import, so it can't be reused; leave it unchanged). The insert covers every column in the JSON (`aliases` as `JSON.stringify`) and keeps its column list in one constant.
+  - `--alternatives` waits for step 19.
+  - A failed run (`ok: false`) counts as failed on schema, verdict and both warning checks, with its failure type recorded; tokens and latency count when usage exists. Pass rates use all runs as the denominator.
+  - Latency: nearest-rank p50/p95 over runs that have a latency.
+  - Exit code 0 after a completed run whatever the scores; non-zero only for setup errors (missing key, unreadable cases file, no catalog rows).
 
 ### Step 18: stage B re-rank
 
