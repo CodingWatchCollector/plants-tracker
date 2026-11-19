@@ -1,6 +1,11 @@
 import type { OpenRouter } from '@openrouter/sdk';
 import z from 'zod';
 import { FIT_CHECK_SYSTEM_PROMPT } from './fit-check-prompt';
+import {
+  structuredCall,
+  type StructuredCallFailure,
+  type StructuredCallUsage,
+} from './structured-call';
 import type { FitCheckResponse, HomeProfile, OwnedPlant, PlantSpecies } from '$lib/types';
 
 const schema = z.object({
@@ -21,15 +26,8 @@ void _plainTypeMatchesSchema;
 
 export const DEFAULT_FIT_CHECK_MODEL = 'anthropic/claude-haiku-4.5';
 
-// refused: the model declined. invalid_response: truncated, empty, or not matching the schema.
-// provider_error: the request itself failed (network, routing, rate limit, bad key).
-export type FitCheckFailure = 'refused' | 'invalid_response' | 'provider_error';
-
-export type FitCheckUsage = {
-  inputTokens: number | null;
-  outputTokens: number | null;
-  latencyMs: number;
-};
+export type FitCheckFailure = StructuredCallFailure;
+export type FitCheckUsage = StructuredCallUsage;
 
 export type FitCheckOutcome =
   | {
@@ -46,18 +44,6 @@ export type FitCheckOutcome =
       usage: FitCheckUsage | null; // null only for provider_error (no response came back)
     };
 
-type TokenCounts = Pick<FitCheckUsage, 'inputTokens' | 'outputTokens'>;
-
-class FitCheckError extends Error {
-  constructor(
-    readonly failure: FitCheckFailure,
-    message: string,
-    readonly tokens?: TokenCounts
-  ) {
-    super(message);
-  }
-}
-
 type EvaluateFitCheckProps = {
   client: OpenRouter;
   model: string;
@@ -66,8 +52,6 @@ type EvaluateFitCheckProps = {
   candidate: PlantSpecies | string;
 };
 
-const MAX_DETAIL_CONTENT = 1000;
-
 export const evaluateFitCheck = async ({
   client,
   model,
@@ -75,100 +59,27 @@ export const evaluateFitCheck = async ({
   ownedPlants,
   candidate,
 }: EvaluateFitCheckProps): Promise<FitCheckOutcome> => {
-  const startTime = performance.now();
-  const usageOf = (tokens?: TokenCounts): FitCheckUsage => ({
-    inputTokens: tokens?.inputTokens ?? null,
-    outputTokens: tokens?.outputTokens ?? null,
-    latencyMs: Math.round(performance.now() - startTime),
+  const result = await structuredCall({
+    client,
+    model,
+    schemaName: 'plant-suggestion',
+    schema,
+    system: FIT_CHECK_SYSTEM_PROMPT,
+    user: getFitCheckMessage({ homeProfile, ownedPlants, candidate }),
   });
-  try {
-    const res = await client.chat.send({
-      chatRequest: {
-        model,
-        messages: [
-          { role: 'system', content: FIT_CHECK_SYSTEM_PROMPT },
-          {
-            role: 'user',
-            content: getFitCheckMessage({ homeProfile, ownedPlants, candidate }),
-          },
-        ],
-        responseFormat: {
-          type: 'json_schema',
-          jsonSchema: {
-            strict: true,
-            name: 'plant-suggestion',
-            schema: schema.toJSONSchema(),
-          },
-        },
-        provider: {
-          requireParameters: true,
-        },
-      },
-    });
-    if (res instanceof ReadableStream) {
-      throw new FitCheckError('provider_error', 'unexpected streaming response');
-    }
-    const tokens: TokenCounts = {
-      inputTokens: res.usage?.promptTokens ?? null,
-      outputTokens: res.usage?.completionTokens ?? null,
-    };
-    const choice = res.choices[0];
-    const finishReason = choice.finishReason;
-    if (finishReason !== 'stop') {
-      throw new FitCheckError(
-        'invalid_response',
-        `unexpected finishReason: ${finishReason}`,
-        tokens
-      );
-    }
-    if (choice.message.refusal) {
-      throw new FitCheckError('refused', 'received refusal message', tokens);
-    }
-    const content = choice.message.content;
-    if (typeof content !== 'string') {
-      throw new FitCheckError('invalid_response', 'wrong content type', tokens);
-    }
-    const parsed = schema.safeParse(parseJson(content));
-    if (!parsed.success) {
-      throw new FitCheckError(
-        'invalid_response',
-        `schema mismatch: ${parsed.error.message}\ncontent: ${content.slice(0, MAX_DETAIL_CONTENT)}`,
-        tokens
-      );
-    }
-    const guardrailed = applyFitCheckGuardrail({
-      response: parsed.data,
-      candidate,
-      homeProfile,
-    });
-    return {
-      ok: true,
-      response: guardrailed.response,
-      rawResponse: parsed.data,
-      guardrailFired: guardrailed.guardrailFired,
-      usage: usageOf(tokens),
-    };
-  } catch (error) {
-    const message = (error as Error)?.message || 'unknown error';
-    console.error(`[EvaluateFitCheck error] ${message}`);
-    if (error instanceof FitCheckError) {
-      return {
-        ok: false,
-        failure: error.failure,
-        detail: message,
-        usage: error.tokens ? usageOf(error.tokens) : null,
-      };
-    }
-    return { ok: false, failure: 'provider_error', detail: message, usage: null };
-  }
-};
-
-const parseJson = (text: string): unknown => {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return undefined;
-  }
+  if (!result.ok) return result;
+  const guardrailed = applyFitCheckGuardrail({
+    response: result.data,
+    candidate,
+    homeProfile,
+  });
+  return {
+    ok: true,
+    response: guardrailed.response,
+    rawResponse: result.data,
+    guardrailFired: guardrailed.guardrailFired,
+    usage: result.usage,
+  };
 };
 
 // Block names match the ones the system prompt refers to (HOME_NOTES, CATALOG).

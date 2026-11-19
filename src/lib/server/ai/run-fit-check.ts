@@ -13,9 +13,21 @@ import { getFitCheckCountByHomeAndDate, logFitCheck } from '../queries/fit-check
 import { getProfile } from '../queries/profile';
 import { DEFAULT_FIT_CHECK_MODEL, evaluateFitCheck, type FitCheckFailure } from './fit-check';
 import { PROMPT_VERSION } from './fit-check-prompt';
+import {
+  MAX_ALTERNATIVES,
+  RERANK_SHORTLIST_SIZE,
+  chooseAlternatives,
+  needsRerank,
+  rerankAlternatives,
+} from './rerank-alternatives';
 
 export const DAILY_FIT_CHECK_LIMIT = 20;
 export const MAX_CANDIDATE_LENGTH = 100;
+
+// sql: the SQL top 3 with templated explanations. rerank: the model picks from the SQL top 10 and
+// explains its picks, falling back to the SQL top 3. Stays 'sql' until the A vs. B eval is judged.
+export type AlternativesMode = 'sql' | 'rerank';
+export const ALTERNATIVES_MODE: AlternativesMode = 'sql';
 
 // What the user typed, trimmed and capped; null when nothing is left.
 export const normalizeCandidate = (raw: unknown): string | null => {
@@ -35,30 +47,41 @@ type RunFitCheckProps = {
   client: OpenRouter;
   homeId: number;
   candidateText: string; // already passed through normalizeCandidate
+  alternativesMode?: AlternativesMode; // for tests and the eval; production uses ALTERNATIVES_MODE
 };
 
 // Look-alikes only exist for catalog candidates: there is nothing to compare a free-text name to.
-// A failure here must not throw away a model answer that has already been paid for and logged.
+// A failure here must not throw away a model answer that has already been paid for and logged. A
+// failed re-rank is no failure at all: chooseAlternatives falls back to the SQL top 3. The re-rank
+// is not logged and does not count toward the quota; the eval measures what it costs.
 const findAlternatives = async (
   db: Client,
+  client: OpenRouter,
+  mode: AlternativesMode,
   homeProfile: HomeProfile,
   species: PlantSpecies | null,
   ownedPlants: OwnedPlant[]
 ): Promise<AlternativeBody[]> => {
   if (!species) return [];
   try {
-    const alternatives = await getAlternatives({
+    const shortlist = await getAlternatives({
       db,
       homeProfile,
       candidate: species,
       excludeSpeciesIds: ownedPlants.flatMap((p) => (p.species ? [p.species.id] : [])),
+      limit: mode === 'rerank' ? RERANK_SHORTLIST_SIZE : MAX_ALTERNATIVES,
     });
-    return alternatives.map((a) => ({
-      species_id: a.species.id,
-      common_name: a.species.common_name,
-      scientific_name: a.species.scientific_name,
-      explanation: a.explanation,
-    }));
+    const rerank =
+      mode === 'rerank' && needsRerank(shortlist)
+        ? await rerankAlternatives({
+            client,
+            model: DEFAULT_FIT_CHECK_MODEL,
+            homeProfile,
+            candidate: species,
+            shortlist,
+          })
+        : null;
+    return chooseAlternatives(shortlist, rerank);
   } catch (error) {
     console.error(`[FindAlternatives error] ${(error as Error)?.message || 'unknown error'}`);
     return [];
@@ -70,6 +93,7 @@ export const runFitCheck = async ({
   client,
   homeId,
   candidateText,
+  alternativesMode = ALTERNATIVES_MODE,
 }: RunFitCheckProps): Promise<RunFitCheckResult> => {
   const checksToday = await getFitCheckCountByHomeAndDate({ db, homeId });
   if (checksToday === null) return { status: 'failed', failure: 'unavailable' };
@@ -89,7 +113,7 @@ export const runFitCheck = async ({
       ownedPlants,
       candidate: species ?? candidateText,
     }),
-    findAlternatives(db, homeProfile, species, ownedPlants),
+    findAlternatives(db, client, alternativesMode, homeProfile, species, ownedPlants),
   ]);
   // refused and invalid answers were already paid for, so they are logged (and count toward the
   // quota). provider_error is not: no answer came back and an outage shouldn't use up a quota.

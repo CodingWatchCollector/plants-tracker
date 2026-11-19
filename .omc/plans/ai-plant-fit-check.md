@@ -200,7 +200,7 @@ Progress markers: `[x]` done and committed, `[~]` written but uncommitted, `[ ]`
 
 **Day 6: alternatives stage B**
 
-- [ ] 18. Model re-rank of the SQL top 10 behind a constant. Details in §6a.
+- [x] 18. Model re-rank of the SQL top 10 behind a constant. Details in §6a.
 - [ ] 19. Alternative-quality report in the eval, A vs. B. Details in §6a.
 
 **Day 7: buffer + write-up**
@@ -287,7 +287,7 @@ Rules for the case set:
 - `rerankAlternatives({ client, model, homeProfile, candidate, shortlist })` → `{ ok: true; picks: { species_id: number; reason: string }[]; invalidPicks: number; usage } | { ok: false; failure; usage | null }`.
 - Shortlist: `getAlternatives(..., limit: 10)`, so the same hard filters and `MIN_SIMILARITY` apply.
 - Prompt input: the candidate's names and look fields (`growth_habit`, `leaf_size`, `leaf_shape`, `variegated`); the home's structured profile fields (**not** the notes, which keeps the injection surface out of this call); the shortlist as JSON lines with `species_id`, names, look fields, `care_level`, `light_needs`, `similarity`. Ask for 2-3 plants that look most like the candidate, using only ids from the list, each with a one-sentence reason a plant buyer would understand.
-- Output schema (Zod → JSON schema, strict): `{ picks: { species_id: number (int), reason: string }[] }`. Don't put `maxItems` in the schema; enforce in code.
+- Output schema (Zod → JSON schema, strict): `{ picks: { species_id: number, reason: string }[] }`. Plain `z.number()`, not `.int()`: Zod's `.int()` adds `minimum`/`maximum` bounds that strict structured outputs may reject; a non-whole id simply fails the shortlist check. Don't put `maxItems` in the schema; enforce in code. A pick with a blank `reason` stays valid and gets the templated explanation.
 - Validation in code: keep picks whose `species_id` is in the shortlist, drop duplicates, keep the first 3. `invalidPicks` = how many were dropped for not being in the shortlist.
 - Wiring in `run-fit-check.ts`:
   - `export const ALTERNATIVES_MODE: 'sql' | 'rerank' = 'sql';` It stays `'sql'` until the user decides after step 19.
@@ -295,6 +295,15 @@ Rules for the case set:
   - Picks become `AlternativeBody` with `explanation = reason`. If the call fails or leaves fewer than 2 valid picks, fall back to the SQL top 3 with templated explanations. A re-rank failure never fails the fit check.
   - One fit check = one quota unit, re-rank included. The re-rank isn't logged to `fit_checks` (no schema change); its cost is measured by the eval.
 - Tests (mocked client): picks outside the shortlist are dropped and counted; duplicates are dropped; fewer than 2 valid picks → SQL fallback; failure → SQL fallback; shortlist ≤ 3 → no model call; `'sql'` mode never calls the re-rank.
+- Agreed with the implementer (2026-11-19):
+  - Shared structured-call helper in a new `src/lib/server/ai/structured-call.ts` (relative imports only): takes client, model, schema name, Zod schema, system prompt and user message; does the request (`requireParameters: true`, strict JSON schema), the `finishReason` / refusal / content-type / Zod checks and usage capture; returns `{ ok: true, data, usage } | { ok: false, failure, detail, usage }`. `evaluateFitCheck` and `rerankAlternatives` both use it; the guardrail stays in `evaluateFitCheck`. The refactor must not change `evaluateFitCheck`'s outcome shape: the existing fit-check tests pass with their assertions unchanged (only mock setup may move).
+  - `chooseAlternatives(shortlist, rerankResult | null)` in `rerank-alternatives.ts`, DB-free: valid picks in the model's order when there are ≥ 2, otherwise `shortlist.slice(0, 3)` with the explanations `getAlternatives` already computed. `null` covers "re-rank skipped" (shortlist ≤ 3). `run-fit-check.ts` and the step 19 eval both use it.
+  - `rerankAlternatives` takes `shortlist: Alternative[]`, reuses `FitCheckUsage` and `FitCheckFailure`, and its failure result carries `detail: string`.
+  - `runFitCheck` takes an optional `alternativesMode` prop defaulting to `ALTERNATIVES_MODE`. Production code never passes it.
+  - Schema name `alternative-picks`; same model and call rules as §5. Input is catalog data and structured profile fields only, so no escaping.
+  - If the fit check ends in `provider_error` after the re-rank was sent, nothing is logged and the re-rank result is discarded (accepted small leak, same rule as outages).
+  - The step 19 results file records `RERANK_PROMPT_VERSION` next to `prompt_version`.
+  - No live calls in step 18.
 
 ### Step 19: A vs. B in the eval
 

@@ -228,6 +228,159 @@ describe('runFitCheck', () => {
     });
   });
 
+  describe('alternatives mode', () => {
+    const rerankCalls = (send: ReturnType<typeof vi.fn>) =>
+      send.mock.calls.filter((c) => schemaName(c) === 'alternative-picks');
+    const schemaName = (call: unknown[]) =>
+      (call[0] as { chatRequest: { responseFormat: { jsonSchema: { name: string } } } }).chatRequest
+        .responseFormat.jsonSchema.name;
+
+    // Answers the fit check and the re-rank with different results, told apart by schema name.
+    const routedClient = (answers: { fit?: unknown; rerank?: unknown | Error }) => {
+      const send = vi.fn(async (request: unknown) => {
+        const name = schemaName([request]);
+        const answer = name === 'alternative-picks' ? answers.rerank : answers.fit;
+        if (answer instanceof Error) throw answer;
+        return answer ?? chatResult(modelAnswer());
+      });
+      return { send, client: fakeClient(send) };
+    };
+
+    const idOf = async (name: string) =>
+      Number(
+        (
+          await db.execute({
+            sql: 'SELECT id FROM plant_species WHERE common_name = ?',
+            args: [name],
+          })
+        ).rows[0].id
+      );
+
+    const picks = (...entries: [number, string][]) => ({
+      picks: entries.map(([species_id, reason]) => ({ species_id, reason })),
+    });
+
+    const run = (client: OpenRouter, alternativesMode?: 'sql' | 'rerank') =>
+      runFitCheck({ db, client, homeId: 1, candidateText: 'monstera', alternativesMode });
+
+    const names = async (result: Awaited<ReturnType<typeof run>>) => {
+      if (result.status !== 'ok') throw new Error('expected ok');
+      return result.body.alternatives.map((a) => a.common_name);
+    };
+
+    beforeEach(async () => {
+      for (const name of ['Vine A', 'Vine B', 'Vine C', 'Vine D', 'Vine E']) {
+        await addSpecies(name);
+      }
+    });
+
+    it('never calls the re-rank in sql mode, which is the default', async () => {
+      const { send, client } = routedClient({});
+      expect(await names(await run(client))).toEqual(['Vine A', 'Vine B', 'Vine C']);
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(rerankCalls(send)).toHaveLength(0);
+    });
+
+    it('skips the re-rank when the shortlist has 3 plants or fewer', async () => {
+      await db.execute(`DELETE FROM plant_species WHERE common_name IN ('Vine D', 'Vine E')`);
+      const { send, client } = routedClient({});
+      expect(await names(await run(client, 'rerank'))).toEqual(['Vine A', 'Vine B', 'Vine C']);
+      expect(rerankCalls(send)).toHaveLength(0);
+    });
+
+    it('uses the model picks in its order, with its reasons as the explanations', async () => {
+      const e = await idOf('Vine E');
+      const c = await idOf('Vine C');
+      const { send, client } = routedClient({
+        rerank: chatResult(picks([e, 'Same lobed leaves.'], [c, 'Also a big climber.'])),
+      });
+      const result = await run(client, 'rerank');
+      if (result.status !== 'ok') throw new Error('expected ok');
+      expect(result.body.alternatives).toEqual([
+        {
+          species_id: e,
+          common_name: 'Vine E',
+          scientific_name: 'Vine E sp.',
+          explanation: 'Same lobed leaves.',
+        },
+        {
+          species_id: c,
+          common_name: 'Vine C',
+          scientific_name: 'Vine C sp.',
+          explanation: 'Also a big climber.',
+        },
+      ]);
+      expect(rerankCalls(send)).toHaveLength(1);
+      expect(send).toHaveBeenCalledTimes(2);
+    });
+
+    it('sends the model the top 10 shortlist and no home notes', async () => {
+      const { send, client } = routedClient({
+        rerank: chatResult(picks([await idOf('Vine A'), 'x'], [await idOf('Vine B'), 'y'])),
+      });
+      await run(client, 'rerank');
+      const message = rerankCalls(send)[0][0].chatRequest.messages[1].content;
+      for (const name of ['Vine A', 'Vine B', 'Vine C', 'Vine D', 'Vine E']) {
+        expect(message).toContain(name);
+      }
+      expect(message).not.toContain('Sunny');
+    });
+
+    it('drops picks outside the shortlist and repeated picks', async () => {
+      const b = await idOf('Vine B');
+      const d = await idOf('Vine D');
+      const { client } = routedClient({
+        rerank: chatResult(picks([99999, 'Not a plant.'], [b, 'One.'], [b, 'Again.'], [d, 'Two.'])),
+      });
+      expect(await names(await run(client, 'rerank'))).toEqual(['Vine B', 'Vine D']);
+    });
+
+    it('falls back to the SQL top 3 when fewer than 2 picks are valid', async () => {
+      const { client } = routedClient({
+        rerank: chatResult(picks([await idOf('Vine D'), 'Only one.'], [99999, 'Not a plant.'])),
+      });
+      const result = await run(client, 'rerank');
+      if (result.status !== 'ok') throw new Error('expected ok');
+      expect(result.body.alternatives.map((a) => a.common_name)).toEqual([
+        'Vine A',
+        'Vine B',
+        'Vine C',
+      ]);
+      expect(result.body.alternatives[0].explanation).toContain('Non-toxic to cats');
+    });
+
+    it.each([
+      ['a refusal', chatResult('', 'stop', 'no')],
+      ['an answer that does not match the schema', chatResult({ picks: 'nope' })],
+      ['a failed request', new Error('network down')],
+    ])('falls back to the SQL top 3, without failing the check, after %s', async (_n, rerank) => {
+      const { client } = routedClient({ rerank });
+      const result = await run(client, 'rerank');
+      expect(await names(result)).toEqual(['Vine A', 'Vine B', 'Vine C']);
+      expect(await fitCheckRows()).toHaveLength(1);
+    });
+
+    it('logs one check, whatever the re-rank did', async () => {
+      const { client } = routedClient({
+        rerank: chatResult(picks([await idOf('Vine A'), 'x'], [await idOf('Vine B'), 'y'])),
+      });
+      await run(client, 'rerank');
+      const rows = await fitCheckRows();
+      expect(rows).toHaveLength(1);
+      expect(rows[0].verdict).toBe('poor_fit');
+    });
+
+    it('logs nothing and fails when the fit check hits a provider error, even after the re-rank was sent', async () => {
+      const { send, client } = routedClient({
+        fit: new Error('provider down'),
+        rerank: chatResult(picks([await idOf('Vine A'), 'x'], [await idOf('Vine B'), 'y'])),
+      });
+      expect(await run(client, 'rerank')).toEqual({ status: 'failed', failure: 'provider_error' });
+      expect(rerankCalls(send)).toHaveLength(1);
+      expect(await fitCheckRows()).toHaveLength(0);
+    });
+  });
+
   describe('candidate missing from the catalog', () => {
     it('is marked model_knowledge with no species_id and sent as "not in catalog"', async () => {
       const send = vi
