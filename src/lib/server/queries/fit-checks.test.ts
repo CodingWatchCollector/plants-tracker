@@ -1,5 +1,5 @@
 import { createClient, type Client } from '@libsql/client';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { runMigrations } from '../migrate';
 import { getFitCheckCountByHomeAndDate, logFitCheck } from './fit-checks';
 
@@ -99,6 +99,23 @@ describe('getFitCheckCountByHomeAndDate', () => {
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
     expect(await getFitCheckCountByHomeAndDate({ db, homeId: 1, date: yesterday })).toBe(2);
     expect(await getFitCheckCountByHomeAndDate({ db, homeId: 1, date: new Date() })).toBe(1);
+  });
+
+  // The in-memory client used here ignores unused named parameters, but the HTTP client to Turso
+  // rejects them ("too many parameters"), which made every quota check fail in production.
+  it.each([
+    ['no date', undefined],
+    ['a date', new Date()],
+  ])('binds exactly the named parameters its SQL uses, with %s', async (_name, date) => {
+    const execute = vi.spyOn(db, 'execute');
+    await getFitCheckCountByHomeAndDate({ db, homeId: 1, date });
+    // spyOn takes its types from the execute(sql: string) overload; the call here is an object.
+    const { sql, args } = execute.mock.calls[0][0] as unknown as {
+      sql: string;
+      args: Record<string, unknown>;
+    };
+    const used = new Set([...sql.matchAll(/\$(\w+)/g)].map((m) => m[1]));
+    expect(new Set(Object.keys(args))).toEqual(used);
   });
 
   it('reaches the quota of 20 and not before', async () => {

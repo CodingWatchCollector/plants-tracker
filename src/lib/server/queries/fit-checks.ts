@@ -67,21 +67,17 @@ export const getFitCheckCountByHomeAndDate = ({
   homeId,
   date,
 }: GetFitCheckCountByHomeAndDateProps) => {
-  const dateISO = date ? date.toISOString() : null;
+  // One statement for both cases, so the bound parameters always match the placeholders (the HTTP
+  // client rejects extras). SQLite's date() reads a bound 'now' the same as the literal.
+  const day = date ? date.toISOString() : 'now';
   return db
     .execute({
       sql: `
   SELECT COUNT(*) as check_count FROM fit_checks
-  WHERE home_id = $homeId AND ${
-    dateISO
-      ? `(created_at >= date($dateISO) AND created_at < date($dateISO, '+1 day'))`
-      : `created_at >= date('now')`
-  }
+  WHERE home_id = $homeId
+    AND created_at >= date($day) AND created_at < date($day, '+1 day')
   `,
-      args: {
-        homeId,
-        dateISO,
-      },
+      args: { homeId, day },
     })
     .then((result) => result.rows[0]['check_count'])
     .catch((err) => {
