@@ -669,3 +669,53 @@ export const formatAlternativesReport = (
   }
   return lines.join('\n');
 };
+
+// ---------------------------------------------------------------------------------------------
+// The results file: evals/fit-check/results/<date>-<model>.json
+// ---------------------------------------------------------------------------------------------
+
+export type ResultsFile = {
+  model: string;
+  prompt_version: string;
+  rerank_prompt_version?: string;
+  runs: number;
+  summary: Summary;
+  cases: CaseResult[];
+  alternatives?: unknown;
+};
+
+// A full fit-check run writes a fresh file for the day, but must not drop an alternatives
+// comparison that is already in the file it replaces: that comparison does not depend on the
+// fit-check prompt, so it stays valid.
+export const buildResultsFile = (
+  fresh: Omit<ResultsFile, 'rerank_prompt_version' | 'alternatives'>,
+  previous: Partial<ResultsFile> | null
+): ResultsFile => ({
+  model: fresh.model,
+  prompt_version: fresh.prompt_version,
+  ...(previous?.alternatives !== undefined && previous.rerank_prompt_version !== undefined
+    ? { rerank_prompt_version: previous.rerank_prompt_version }
+    : {}),
+  runs: fresh.runs,
+  summary: fresh.summary,
+  cases: fresh.cases,
+  ...(previous?.alternatives !== undefined ? { alternatives: previous.alternatives } : {}),
+});
+
+// Adds (or replaces) the alternatives comparison in an existing results file and records the
+// re-rank prompt version next to prompt_version. The fit-check part is left exactly as it was.
+export const addAlternativesToResults = (
+  existing: Record<string, unknown>,
+  rerankPromptVersion: string,
+  alternatives: unknown
+): Record<string, unknown> => {
+  const { model, prompt_version, rerank_prompt_version: _old, ...rest } = existing;
+  const { alternatives: _oldAlternatives, ...others } = rest;
+  return {
+    model,
+    prompt_version,
+    rerank_prompt_version: rerankPromptVersion,
+    ...others,
+    alternatives,
+  };
+};

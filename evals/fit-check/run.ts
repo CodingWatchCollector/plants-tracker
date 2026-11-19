@@ -14,6 +14,8 @@ import { getAlternatives } from '../../src/lib/server/queries/alternatives';
 import { findSpeciesByName } from '../../src/lib/server/queries/catalog';
 import {
   buildHomeProfile,
+  addAlternativesToResults,
+  buildResultsFile,
   executeAlternatives,
   executeCases,
   failingCases,
@@ -27,6 +29,7 @@ import {
   type EvalCase,
   type PreparedAlternatives,
   type PreparedCase,
+  type ResultsFile,
   type Prices,
 } from './score';
 
@@ -162,11 +165,16 @@ const runFitCheckEval = async (
   }
   const file = resultsPath(args.model);
   await mkdir(resultsDir, { recursive: true });
-  await writeFile(
-    file,
-    `${JSON.stringify({ model: args.model, prompt_version: PROMPT_VERSION, runs: args.runs, summary, cases: results }, null, 2)}\n`
+  // Keep an alternatives comparison already in today's file (see buildResultsFile).
+  const previous = (await readJson(file).catch(() => null)) as Partial<ResultsFile> | null;
+  const body = buildResultsFile(
+    { model: args.model, prompt_version: PROMPT_VERSION, runs: args.runs, summary, cases: results },
+    previous
   );
-  console.log(`\nWrote ${file}`);
+  await writeFile(file, `${JSON.stringify(body, null, 2)}\n`);
+  console.log(
+    `\nWrote ${file}${body.alternatives !== undefined ? ' (kept the alternatives comparison from the file it replaced)' : ''}`
+  );
 };
 
 // The alternatives part: stage A against stage B for every case with a catalog candidate. It does
@@ -226,24 +234,13 @@ const runAlternativesEval = async (
     console.log('\n--case run: results file not written.');
     return;
   }
-  const { model, prompt_version, runs, summary: fitSummary, cases, ...rest } = existing;
-  await writeFile(
-    file,
-    `${JSON.stringify(
-      {
-        model,
-        prompt_version,
-        rerank_prompt_version: RERANK_PROMPT_VERSION,
-        runs,
-        summary: fitSummary,
-        cases,
-        ...rest,
-        alternatives: { runs: args.runs, summary, cases: results, skipped_cases: skipped },
-      },
-      null,
-      2
-    )}\n`
-  );
+  const body = addAlternativesToResults(existing, RERANK_PROMPT_VERSION, {
+    runs: args.runs,
+    summary,
+    cases: results,
+    skipped_cases: skipped,
+  });
+  await writeFile(file, `${JSON.stringify(body, null, 2)}\n`);
   console.log(`\nAdded the alternatives comparison to ${file}`);
 };
 

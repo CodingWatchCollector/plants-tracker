@@ -5,7 +5,9 @@ import type { FitCheckOutcome } from '../../src/lib/server/ai/fit-check';
 import type { Alternative } from '../../src/lib/server/queries/alternatives';
 import type { FitCheckResponse, PlantSpecies } from '../../src/lib/types';
 import {
+  addAlternativesToResults,
   buildHomeProfile,
+  buildResultsFile,
   evaluateAlternatives,
   executeAlternatives,
   executeCases,
@@ -796,6 +798,91 @@ describe('alternatives comparison', () => {
       expect(text).toContain('invalid-pick rate 0.0%, fallback rate 0.0%');
       expect(text).toContain('per check: 1000 in / 100 out tokens, $0.00150, 400 ms');
       expect(text).toContain('Not compared (candidate not in the catalog): injection-x');
+    });
+  });
+});
+
+describe('results file', () => {
+  const summary = summarize([score(evalCase(), okOutcome())]);
+  const cases = [{ id: 'a-case', runs: [score(evalCase(), okOutcome())] }];
+  const fresh = { model: 'x/y', prompt_version: 'fit-check-v2', runs: 3, summary, cases };
+  const alternatives = { runs: 3, summary: { runs: 48 }, cases: [], skipped_cases: [] };
+
+  describe('buildResultsFile', () => {
+    it('writes just the fit-check part when there is no earlier file', () => {
+      const file = buildResultsFile(fresh, null);
+      expect(Object.keys(file)).toEqual(['model', 'prompt_version', 'runs', 'summary', 'cases']);
+    });
+
+    it('keeps the alternatives comparison and its prompt version from the file it replaces', () => {
+      const file = buildResultsFile(fresh, {
+        prompt_version: 'fit-check-v1',
+        rerank_prompt_version: 'rerank-v1',
+        alternatives,
+      });
+      expect(file.prompt_version).toBe('fit-check-v2');
+      expect(file.rerank_prompt_version).toBe('rerank-v1');
+      expect(file.alternatives).toBe(alternatives);
+      expect(Object.keys(file)).toEqual([
+        'model',
+        'prompt_version',
+        'rerank_prompt_version',
+        'runs',
+        'summary',
+        'cases',
+        'alternatives',
+      ]);
+    });
+
+    it('takes the fit-check numbers from the new run, not the old file', () => {
+      const file = buildResultsFile(fresh, {
+        runs: 99,
+        summary: { ...summary, runs: 99 },
+        cases: [],
+        alternatives,
+      });
+      expect(file.runs).toBe(3);
+      expect(file.summary).toBe(summary);
+      expect(file.cases).toBe(cases);
+    });
+
+    it('does not invent an alternatives section the old file did not have', () => {
+      const file = buildResultsFile(fresh, { prompt_version: 'fit-check-v1', runs: 3 });
+      expect(file).not.toHaveProperty('alternatives');
+      expect(file).not.toHaveProperty('rerank_prompt_version');
+    });
+  });
+
+  describe('addAlternativesToResults', () => {
+    const existing = { model: 'x/y', prompt_version: 'fit-check-v2', runs: 3, summary, cases };
+
+    it('adds the comparison and the re-rank prompt version next to prompt_version', () => {
+      const file = addAlternativesToResults(existing, 'rerank-v1', alternatives);
+      expect(Object.keys(file)).toEqual([
+        'model',
+        'prompt_version',
+        'rerank_prompt_version',
+        'runs',
+        'summary',
+        'cases',
+        'alternatives',
+      ]);
+      expect(file.alternatives).toBe(alternatives);
+    });
+
+    it('leaves the fit-check part exactly as it was', () => {
+      const file = addAlternativesToResults(existing, 'rerank-v1', alternatives);
+      expect(file).toMatchObject({ model: 'x/y', prompt_version: 'fit-check-v2', runs: 3 });
+      expect(file.summary).toBe(summary);
+      expect(file.cases).toBe(cases);
+    });
+
+    it('replaces an earlier comparison instead of stacking a second one', () => {
+      const once = addAlternativesToResults(existing, 'rerank-v1', { old: true });
+      const twice = addAlternativesToResults(once, 'rerank-v2', alternatives);
+      expect(twice.alternatives).toBe(alternatives);
+      expect(twice.rerank_prompt_version).toBe('rerank-v2');
+      expect(Object.keys(twice).filter((k) => k === 'alternatives')).toHaveLength(1);
     });
   });
 });

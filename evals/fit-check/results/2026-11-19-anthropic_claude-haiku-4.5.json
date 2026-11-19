@@ -1,21 +1,21 @@
 {
   "model": "anthropic/claude-haiku-4.5",
-  "prompt_version": "fit-check-v1",
+  "prompt_version": "fit-check-v2",
   "rerank_prompt_version": "rerank-v1",
   "runs": 3,
   "summary": {
     "runs": 60,
     "schema_pass_rate": 1,
     "verdict_pass_rate": 1,
-    "warnings_final_pass_rate": 0.9833333333333333,
-    "warnings_raw_pass_rate": 0.9833333333333333,
+    "warnings_final_pass_rate": 1,
+    "warnings_raw_pass_rate": 1,
     "guardrail_fire_rate": 0,
     "failures": {},
-    "avg_input_tokens": 1337.9,
-    "avg_output_tokens": 162.06666666666666,
-    "avg_cost": 0.0021482333333333334,
-    "latency_p50_ms": 2045,
-    "latency_p95_ms": 4827
+    "avg_input_tokens": 1399.9,
+    "avg_output_tokens": 158.58333333333334,
+    "avg_cost": 0.0021928166666666665,
+    "latency_p50_ms": 1962,
+    "latency_p95_ms": 2847
   },
   "cases": [
     {
@@ -28,16 +28,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats if ingested—can cause oral irritation and vomiting"
+            "Toxic to cats if ingested; causes oral irritation and vomiting"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1388,
-          "output_tokens": 116,
-          "latency_ms": 4914,
-          "cost": 0.001968
+          "input_tokens": 1450,
+          "output_tokens": 144,
+          "latency_ms": 2526,
+          "cost": 0.00217
         },
         {
           "schema_ok": true,
@@ -46,16 +46,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats if ingested. Can cause oral irritation, drooling, and vomiting."
+            "Toxic to cats if ingested; can cause oral irritation and vomiting"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1388,
-          "output_tokens": 129,
-          "latency_ms": 5028,
-          "cost": 0.002033
+          "input_tokens": 1450,
+          "output_tokens": 146,
+          "latency_ms": 2541,
+          "cost": 0.00218
         },
         {
           "schema_ok": true,
@@ -64,16 +64,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats if ingested—can cause oral irritation and vomiting"
+            "Toxic to cats if ingested; causes oral irritation and vomiting"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1388,
-          "output_tokens": 152,
-          "latency_ms": 4991,
-          "cost": 0.002148
+          "input_tokens": 1450,
+          "output_tokens": 109,
+          "latency_ms": 2106,
+          "cost": 0.001995
         }
       ]
     },
@@ -87,16 +87,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to dogs if ingested; can cause mild gastrointestinal upset"
+            "Toxic to dogs if ingested; causes mild gastrointestinal upset"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1363,
-          "output_tokens": 140,
-          "latency_ms": 4749,
-          "cost": 0.002063
+          "input_tokens": 1425,
+          "output_tokens": 141,
+          "latency_ms": 2108,
+          "cost": 0.00213
         },
         {
           "schema_ok": true,
@@ -105,16 +105,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to dogs if ingested; causes mild GI upset"
+            "Toxic to dogs if ingested; causes mild gastrointestinal upset."
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1363,
-          "output_tokens": 147,
-          "latency_ms": 2097,
-          "cost": 0.002098
+          "input_tokens": 1425,
+          "output_tokens": 139,
+          "latency_ms": 1769,
+          "cost": 0.00212
         },
         {
           "schema_ok": true,
@@ -123,16 +123,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to dogs if ingested; may cause mild GI upset"
+            "Toxic to dogs if ingested"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1363,
+          "input_tokens": 1425,
           "output_tokens": 106,
-          "latency_ms": 1712,
-          "cost": 0.001893
+          "latency_ms": 1769,
+          "cost": 0.001955
         }
       ]
     },
@@ -146,52 +146,52 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats if ingested—saponins and anthraquinones cause GI upset"
+            "Toxic to cats if ingested"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1470,
+          "input_tokens": 1532,
+          "output_tokens": 137,
+          "latency_ms": 1943,
+          "cost": 0.002217
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; causes GI upset"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1532,
+          "output_tokens": 148,
+          "latency_ms": 1988,
+          "cost": 0.002272
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to cats if ingested; causes gastrointestinal upset"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1532,
           "output_tokens": 154,
-          "latency_ms": 2972,
-          "cost": 0.00224
-        },
-        {
-          "schema_ok": true,
-          "failure": null,
-          "detail": null,
-          "verdict": "poor_fit",
-          "raw_verdict": "poor_fit",
-          "warnings": [
-            "Toxic to cats if ingested—saponins and anthraquinones cause GI upset"
-          ],
-          "verdict_ok": true,
-          "warnings_ok_final": true,
-          "warnings_ok_raw": true,
-          "guardrail_fired": false,
-          "input_tokens": 1470,
-          "output_tokens": 160,
-          "latency_ms": 2178,
-          "cost": 0.00227
-        },
-        {
-          "schema_ok": true,
-          "failure": null,
-          "detail": null,
-          "verdict": "poor_fit",
-          "raw_verdict": "poor_fit",
-          "warnings": [
-            "Toxic to cats if ingested—can cause gastrointestinal upset"
-          ],
-          "verdict_ok": true,
-          "warnings_ok_final": true,
-          "warnings_ok_raw": true,
-          "guardrail_fired": false,
-          "input_tokens": 1470,
-          "output_tokens": 133,
-          "latency_ms": 1876,
-          "cost": 0.002135
+          "latency_ms": 2313,
+          "cost": 0.002302
         }
       ]
     },
@@ -205,18 +205,17 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats if ingested",
-            "Toxic to dogs if ingested",
-            "Contains calcium oxalates that cause oral irritation"
+            "Toxic to cats if ingested; causes oral irritation.",
+            "Toxic to dogs if ingested; causes oral irritation."
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1275,
-          "output_tokens": 179,
-          "latency_ms": 2505,
-          "cost": 0.00217
+          "input_tokens": 1337,
+          "output_tokens": 178,
+          "latency_ms": 1903,
+          "cost": 0.002227
         },
         {
           "schema_ok": true,
@@ -225,18 +224,17 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats if ingested",
-            "Toxic to dogs if ingested",
-            "Contains calcium oxalates that cause oral irritation"
+            "Toxic to cats if ingested; causes oral irritation",
+            "Toxic to dogs if ingested; causes oral irritation"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1275,
-          "output_tokens": 156,
-          "latency_ms": 1782,
-          "cost": 0.002055
+          "input_tokens": 1337,
+          "output_tokens": 173,
+          "latency_ms": 1761,
+          "cost": 0.002202
         },
         {
           "schema_ok": true,
@@ -245,17 +243,17 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats if ingested—can cause oral irritation",
-            "Toxic to dogs if ingested—can cause oral irritation"
+            "Toxic to cats if ingested—causes oral irritation from calcium oxalates",
+            "Toxic to dogs if ingested—causes oral irritation from calcium oxalates"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1275,
-          "output_tokens": 169,
-          "latency_ms": 2249,
-          "cost": 0.00212
+          "input_tokens": 1337,
+          "output_tokens": 188,
+          "latency_ms": 1969,
+          "cost": 0.002277
         }
       ]
     },
@@ -269,18 +267,17 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Extremely toxic to cats—all parts including pollen are dangerous",
-            "Even small amounts of leaf or petal ingestion can cause severe kidney damage in cats",
-            "Symptoms of toxicity may not appear for several days, making treatment difficult"
+            "Toxic to cats if ingested; can cause severe kidney damage or death",
+            "Requires consistently moist (not wet) soil and high humidity, which demands close attention"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1295,
-          "output_tokens": 158,
-          "latency_ms": 2135,
-          "cost": 0.002085
+          "input_tokens": 1357,
+          "output_tokens": 162,
+          "latency_ms": 2408,
+          "cost": 0.002167
         },
         {
           "schema_ok": true,
@@ -289,18 +286,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Highly toxic to cats if ingested — can cause acute kidney injury and death",
-            "All parts of the plant are toxic, including pollen",
-            "Even a small amount of lily consumption is dangerous to cats"
+            "Toxic to cats if ingested; can cause gastrointestinal upset, drooling, vomiting, diarrhea, and potentially kidney damage"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1295,
-          "output_tokens": 136,
-          "latency_ms": 1675,
-          "cost": 0.001975
+          "input_tokens": 1357,
+          "output_tokens": 119,
+          "latency_ms": 1727,
+          "cost": 0.001952
         },
         {
           "schema_ok": true,
@@ -309,18 +304,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Extremely toxic to cats if ingested—can cause acute kidney injury or death",
-            "All parts of the plant are poisonous to cats, including pollen, leaves, and stems",
-            "Even small amounts or indirect exposure (e.g., grooming pollen off fur) can be dangerous"
+            "Toxic to cats if ingested; can cause severe kidney damage and is potentially fatal"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1295,
-          "output_tokens": 158,
-          "latency_ms": 2121,
-          "cost": 0.002085
+          "input_tokens": 1357,
+          "output_tokens": 97,
+          "latency_ms": 1617,
+          "cost": 0.001842
         }
       ]
     },
@@ -334,17 +327,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Highly toxic to dogs if ingested—all parts of the plant are poisonous and can cause severe liver damage",
-            "Requires well-draining soil and careful watering to avoid root rot"
+            "Toxic to dogs if ingested; all parts of the plant are poisonous including the seeds and roots, which are the most toxic parts"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1277,
-          "output_tokens": 174,
-          "latency_ms": 2693,
-          "cost": 0.002147
+          "input_tokens": 1339,
+          "output_tokens": 146,
+          "latency_ms": 1961,
+          "cost": 0.002069
         },
         {
           "schema_ok": true,
@@ -353,17 +345,17 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Highly toxic to dogs if ingested—can cause severe liver damage and potentially be fatal",
-            "Requires regular watering (every 7-10 days) and consistent moisture, more demanding than household's current care pattern"
+            "Highly toxic to dogs if ingested—can cause severe liver damage and potentially death",
+            "Requires careful watering schedule and well-draining soil; marginally suitable for medium-care households"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1277,
-          "output_tokens": 173,
-          "latency_ms": 2029,
-          "cost": 0.002142
+          "input_tokens": 1339,
+          "output_tokens": 156,
+          "latency_ms": 2150,
+          "cost": 0.002119
         },
         {
           "schema_ok": true,
@@ -372,16 +364,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Sago palm is toxic to dogs and can cause serious harm if ingested. Do not bring this plant into a home with dogs."
+            "Toxic to dogs if ingested; can cause severe poisoning and liver failure."
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1277,
-          "output_tokens": 123,
-          "latency_ms": 1902,
-          "cost": 0.001892
+          "input_tokens": 1339,
+          "output_tokens": 111,
+          "latency_ms": 1909,
+          "cost": 0.001894
         }
       ]
     },
@@ -395,19 +387,17 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Highly toxic to children if any part is ingested",
-            "All parts of oleander (leaves, stems, flowers, seeds) contain cardiac glycosides and other toxins",
-            "Can cause serious gastrointestinal, cardiac, and neurological symptoms",
-            "Not recommended for homes with small children"
+            "Oleander is highly toxic to children if ingested—all parts of the plant (leaves, stems, flowers, seeds) contain cardiac glycosides and can cause serious poisoning or death",
+            "Do not bring this plant into a home with small kids"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1187,
-          "output_tokens": 218,
-          "latency_ms": 2521,
-          "cost": 0.002277
+          "input_tokens": 1249,
+          "output_tokens": 181,
+          "latency_ms": 2300,
+          "cost": 0.002154
         },
         {
           "schema_ok": true,
@@ -416,38 +406,35 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Oleander is extremely toxic if ingested—all parts including leaves, stems, flowers, and seeds contain cardiac glycosides",
-            "Ingestion can cause severe symptoms including nausea, vomiting, abdominal pain, cardiac arrhythmias, and potentially death",
-            "This plant should not be kept in homes with small children"
-          ],
-          "verdict_ok": true,
-          "warnings_ok_final": false,
-          "warnings_ok_raw": false,
-          "guardrail_fired": false,
-          "input_tokens": 1187,
-          "output_tokens": 163,
-          "latency_ms": 1652,
-          "cost": 0.002002
-        },
-        {
-          "schema_ok": true,
-          "failure": null,
-          "detail": null,
-          "verdict": "poor_fit",
-          "raw_verdict": "poor_fit",
-          "warnings": [
-            "Oleander is toxic to children if ingested—all parts of the plant (leaves, flowers, stems, roots) contain cardiac glycosides that can cause serious poisoning",
-            "Symptoms of ingestion include nausea, vomiting, abdominal pain, irregular heartbeat, and potentially fatal cardiac effects",
-            "This plant should not be in a home with small children"
+            "Highly toxic to children if ingested—all parts including leaves, stems, flowers, and seeds are poisonous and can cause serious harm or death",
+            "Requires regular watering, feeding, and pruning to thrive"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1187,
+          "input_tokens": 1249,
           "output_tokens": 166,
-          "latency_ms": 1951,
-          "cost": 0.002017
+          "latency_ms": 2033,
+          "cost": 0.002079
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "poor_fit",
+          "raw_verdict": "poor_fit",
+          "warnings": [
+            "Toxic to children if ingested—all parts of the plant (leaves, stems, flowers, seeds) are poisonous and can cause serious illness or death"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1249,
+          "output_tokens": 142,
+          "latency_ms": 1962,
+          "cost": 0.001959
         }
       ]
     },
@@ -461,17 +448,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to children if ingested—can cause significant oral swelling, drooling, and difficulty swallowing",
-            "Contains calcium oxalates"
+            "Toxic to children if ingested—causes significant oral swelling, drooling, and difficulty swallowing"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1378,
-          "output_tokens": 178,
-          "latency_ms": 2078,
-          "cost": 0.002268
+          "input_tokens": 1440,
+          "output_tokens": 128,
+          "latency_ms": 1659,
+          "cost": 0.00208
         },
         {
           "schema_ok": true,
@@ -480,17 +466,17 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic if ingested by small children—can cause oral swelling and difficulty swallowing",
-            "Also toxic to cats and dogs if the household acquires pets in future"
+            "Toxic to cats and dogs if ingested; causes oral swelling, drooling, and difficulty swallowing",
+            "Toxic to children if ingested; causes mouth and throat irritation"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1378,
-          "output_tokens": 165,
-          "latency_ms": 1878,
-          "cost": 0.002203
+          "input_tokens": 1440,
+          "output_tokens": 255,
+          "latency_ms": 2371,
+          "cost": 0.002715
         },
         {
           "schema_ok": true,
@@ -499,17 +485,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic if ingested by children—causes significant oral swelling, drooling, and difficulty swallowing",
-            "Keep out of reach of small children"
+            "Toxic to children if ingested; causes significant oral swelling, drooling, and difficulty swallowing."
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1378,
-          "output_tokens": 202,
-          "latency_ms": 2089,
-          "cost": 0.002388
+          "input_tokens": 1440,
+          "output_tokens": 176,
+          "latency_ms": 3686,
+          "cost": 0.00232
         }
       ]
     },
@@ -523,17 +508,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic if ingested by children—causes oral irritation from calcium oxalate crystals",
-            "Contains compounds that can cause mouth and throat irritation"
+            "Toxic to children if ingested; causes oral irritation and gastrointestinal distress"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1295,
-          "output_tokens": 162,
-          "latency_ms": 1851,
-          "cost": 0.002105
+          "input_tokens": 1357,
+          "output_tokens": 141,
+          "latency_ms": 1822,
+          "cost": 0.002062
         },
         {
           "schema_ok": true,
@@ -542,17 +526,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic if ingested by small children; causes oral irritation and mouth pain",
-            "Requires consistent watering (every 6 days); low drought tolerance"
+            "Toxic to children if ingested; causes oral irritation and mouth discomfort"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1295,
-          "output_tokens": 181,
-          "latency_ms": 1936,
-          "cost": 0.0022
+          "input_tokens": 1357,
+          "output_tokens": 171,
+          "latency_ms": 1980,
+          "cost": 0.002212
         },
         {
           "schema_ok": true,
@@ -561,17 +544,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to small children if ingested—causes oral irritation",
-            "Requires frequent watering (every 6 days) in low-light conditions, increasing risk of overwatering or neglect"
+            "Toxic to children if ingested; causes oral irritation from calcium oxalate crystals"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1295,
-          "output_tokens": 226,
-          "latency_ms": 2167,
-          "cost": 0.002425
+          "input_tokens": 1357,
+          "output_tokens": 182,
+          "latency_ms": 2339,
+          "cost": 0.002267
         }
       ]
     },
@@ -585,16 +567,18 @@
           "verdict": "caution",
           "raw_verdict": "caution",
           "warnings": [
-            "Requires watering every 5 days and prefers high humidity—risk of leaf browning and decline if watering schedule is missed"
+            "Requires watering every 5 days; sensitive to underwatering and inconsistent moisture",
+            "Needs high humidity; may struggle in dry indoor environments without misting or a humidifier",
+            "Leaves are sensitive to tap water; distilled or filtered water recommended"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1362,
-          "output_tokens": 169,
-          "latency_ms": 2004,
-          "cost": 0.002207
+          "input_tokens": 1424,
+          "output_tokens": 205,
+          "latency_ms": 2458,
+          "cost": 0.002449
         },
         {
           "schema_ok": true,
@@ -603,17 +587,17 @@
           "verdict": "caution",
           "raw_verdict": "caution",
           "warnings": [
-            "Requires watering every 5 days; sensitive to underwatering and low humidity",
-            "Susceptible to brown leaf tips and pest issues if not carefully maintained"
+            "Calathea requires consistent moisture and humidity; soil should not dry out between waterings",
+            "Watering interval of approximately 5 days is demanding for a low-care household"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1362,
-          "output_tokens": 176,
-          "latency_ms": 1942,
-          "cost": 0.002242
+          "input_tokens": 1424,
+          "output_tokens": 192,
+          "latency_ms": 2847,
+          "cost": 0.002384
         },
         {
           "schema_ok": true,
@@ -622,18 +606,18 @@
           "verdict": "caution",
           "raw_verdict": "caution",
           "warnings": [
-            "Requires watering approximately every 5 days (more frequent than typical household routines)",
-            "Needs consistent humidity and careful watering practices to prevent leaf damage and decline",
-            "Higher risk of failure compared to low-maintenance alternatives for busy households"
+            "Calathea requires watering approximately every 5 days and prefers consistently moist (not soggy) soil",
+            "Requires high humidity; may struggle in dry indoor environments without a humidifier or regular misting",
+            "Sensitive to water quality; prefers filtered or distilled water to avoid leaf browning from minerals"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1362,
-          "output_tokens": 202,
-          "latency_ms": 2278,
-          "cost": 0.002372
+          "input_tokens": 1424,
+          "output_tokens": 216,
+          "latency_ms": 2745,
+          "cost": 0.002504
         }
       ]
     },
@@ -646,15 +630,17 @@
           "detail": null,
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
-          "warnings": [],
+          "warnings": [
+            "Boston fern requires consistent watering and will decline rapidly if watered less frequently than every 4–5 days"
+          ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1465,
-          "output_tokens": 162,
-          "latency_ms": 1841,
-          "cost": 0.002275
+          "input_tokens": 1527,
+          "output_tokens": 212,
+          "latency_ms": 2561,
+          "cost": 0.002587
         },
         {
           "schema_ok": true,
@@ -662,15 +648,17 @@
           "detail": null,
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
-          "warnings": [],
+          "warnings": [
+            "Boston ferns require consistently moist soil and will deteriorate quickly if allowed to dry out, which conflicts with this household's watering habits."
+          ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1465,
-          "output_tokens": 171,
-          "latency_ms": 2056,
-          "cost": 0.00232
+          "input_tokens": 1527,
+          "output_tokens": 183,
+          "latency_ms": 2361,
+          "cost": 0.002442
         },
         {
           "schema_ok": true,
@@ -678,15 +666,17 @@
           "detail": null,
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
-          "warnings": [],
+          "warnings": [
+            "Boston fern requires consistent moisture and will decline or die with infrequent watering."
+          ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1465,
-          "output_tokens": 154,
-          "latency_ms": 3187,
-          "cost": 0.002235
+          "input_tokens": 1527,
+          "output_tokens": 167,
+          "latency_ms": 2311,
+          "cost": 0.002362
         }
       ]
     },
@@ -700,16 +690,16 @@
           "verdict": "caution",
           "raw_verdict": "caution",
           "warnings": [
-            "Ponytail palm requires bright, indirect light to thrive; low-light conditions may cause slow growth or decline"
+            "Ponytail palm requires bright indirect light; may struggle in low-light conditions"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1359,
-          "output_tokens": 146,
-          "latency_ms": 1783,
-          "cost": 0.002089
+          "input_tokens": 1421,
+          "output_tokens": 155,
+          "latency_ms": 2548,
+          "cost": 0.002196
         },
         {
           "schema_ok": true,
@@ -718,16 +708,16 @@
           "verdict": "caution",
           "raw_verdict": "caution",
           "warnings": [
-            "Ponytail palm requires bright light to thrive; low-light conditions may cause slow growth or decline"
+            "Ponytail palm requires bright indirect light to thrive; low-light conditions may cause slow growth and decline"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1359,
-          "output_tokens": 144,
-          "latency_ms": 1772,
-          "cost": 0.002079
+          "input_tokens": 1421,
+          "output_tokens": 137,
+          "latency_ms": 1840,
+          "cost": 0.002106
         },
         {
           "schema_ok": true,
@@ -736,16 +726,16 @@
           "verdict": "caution",
           "raw_verdict": "caution",
           "warnings": [
-            "Ponytail palm prefers bright, indirect light and may not perform well in consistently low-light conditions"
+            "Ponytail palm requires bright indirect light to thrive; insufficient light may cause stunted growth and drooping leaves"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1359,
-          "output_tokens": 154,
-          "latency_ms": 1891,
-          "cost": 0.002129
+          "input_tokens": 1421,
+          "output_tokens": 145,
+          "latency_ms": 1784,
+          "cost": 0.002146
         }
       ]
     },
@@ -759,17 +749,17 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats and dogs if ingested; causes GI upset and flower/fruit parts are most concerning",
-            "Requires bright, indirect light—low-light home unsuitable"
+            "Toxic to cats if ingested; causes GI upset, especially from flower and fruit parts",
+            "Toxic to dogs if ingested; causes GI upset, especially from flower and fruit parts"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1289,
-          "output_tokens": 167,
-          "latency_ms": 1929,
-          "cost": 0.002124
+          "input_tokens": 1351,
+          "output_tokens": 176,
+          "latency_ms": 2049,
+          "cost": 0.002231
         },
         {
           "schema_ok": true,
@@ -778,17 +768,18 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats and dogs if ingested; causes GI upset, especially from flowers/fruit parts",
-            "Requires bright light; unsuitable for low-light homes"
+            "Requires bright indirect or direct light to thrive; low-light homes will struggle to meet its needs",
+            "Toxic to cats if ingested—causes GI upset; flower and fruit parts are most concerning",
+            "Toxic to dogs if ingested—causes GI upset; flower and fruit parts are most concerning"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1289,
-          "output_tokens": 153,
-          "latency_ms": 2298,
-          "cost": 0.002054
+          "input_tokens": 1351,
+          "output_tokens": 184,
+          "latency_ms": 2077,
+          "cost": 0.002271
         },
         {
           "schema_ok": true,
@@ -797,18 +788,18 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats if ingested (mild toxicity, can cause GI upset)",
-            "Toxic to dogs if ingested (mild toxicity, can cause GI upset)",
-            "Flower and fruit parts are most concerning if eaten"
+            "Toxic to cats if ingested, causing gastrointestinal upset",
+            "Toxic to dogs if ingested, causing gastrointestinal upset",
+            "Requires bright indirect light to thrive; unlikely to succeed in low-light conditions"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1289,
-          "output_tokens": 191,
-          "latency_ms": 3138,
-          "cost": 0.002244
+          "input_tokens": 1351,
+          "output_tokens": 190,
+          "latency_ms": 5835,
+          "cost": 0.002301
         }
       ]
     },
@@ -822,16 +813,16 @@
           "verdict": "caution",
           "raw_verdict": "caution",
           "warnings": [
-            "Requires watering every 5 days; will suffer if left unwatered during trips longer than a few days"
+            "Prayer plant requires frequent watering (every 5 days) and will suffer if left dry during travel"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1377,
-          "output_tokens": 178,
-          "latency_ms": 2295,
-          "cost": 0.002267
+          "input_tokens": 1439,
+          "output_tokens": 167,
+          "latency_ms": 1913,
+          "cost": 0.002274
         },
         {
           "schema_ok": true,
@@ -840,16 +831,16 @@
           "verdict": "caution",
           "raw_verdict": "caution",
           "warnings": [
-            "Requires watering every 5 days; may suffer during household travel or absences"
+            "Prayer plant requires consistent moisture and is not drought-tolerant; it will suffer quickly if watering is missed during trips."
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1377,
-          "output_tokens": 181,
-          "latency_ms": 2092,
-          "cost": 0.002282
+          "input_tokens": 1439,
+          "output_tokens": 172,
+          "latency_ms": 2360,
+          "cost": 0.002299
         },
         {
           "schema_ok": true,
@@ -857,17 +848,15 @@
           "detail": null,
           "verdict": "caution",
           "raw_verdict": "caution",
-          "warnings": [
-            "Requires consistent watering every 5 days; prone to decline if underwatered during travel"
-          ],
+          "warnings": [],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1377,
-          "output_tokens": 207,
-          "latency_ms": 3113,
-          "cost": 0.002412
+          "input_tokens": 1439,
+          "output_tokens": 160,
+          "latency_ms": 1946,
+          "cost": 0.002239
         }
       ]
     },
@@ -880,35 +869,15 @@
           "detail": null,
           "verdict": "good_fit",
           "raw_verdict": "good_fit",
-          "warnings": [
-            "Spider plants produce runners with baby plantlets that may be attractive to cats; while the plant itself is non-toxic, provide safe access if your cats show interest"
-          ],
+          "warnings": [],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1470,
-          "output_tokens": 217,
-          "latency_ms": 2580,
-          "cost": 0.002555
-        },
-        {
-          "schema_ok": true,
-          "failure": null,
-          "detail": null,
-          "verdict": "good_fit",
-          "raw_verdict": "good_fit",
-          "warnings": [
-            "May have a mild catnip-like hallucinogenic effect on cats, though it is not poisonous"
-          ],
-          "verdict_ok": true,
-          "warnings_ok_final": true,
-          "warnings_ok_raw": true,
-          "guardrail_fired": false,
-          "input_tokens": 1470,
-          "output_tokens": 213,
-          "latency_ms": 2183,
-          "cost": 0.002535
+          "input_tokens": 1532,
+          "output_tokens": 171,
+          "latency_ms": 1932,
+          "cost": 0.002387
         },
         {
           "schema_ok": true,
@@ -921,10 +890,26 @@
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1470,
-          "output_tokens": 178,
-          "latency_ms": 4827,
-          "cost": 0.00236
+          "input_tokens": 1532,
+          "output_tokens": 182,
+          "latency_ms": 2208,
+          "cost": 0.002442
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "good_fit",
+          "raw_verdict": "good_fit",
+          "warnings": [],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1532,
+          "output_tokens": 182,
+          "latency_ms": 5119,
+          "cost": 0.002442
         }
       ]
     },
@@ -942,10 +927,10 @@
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1360,
-          "output_tokens": 174,
-          "latency_ms": 2075,
-          "cost": 0.00223
+          "input_tokens": 1422,
+          "output_tokens": 145,
+          "latency_ms": 1926,
+          "cost": 0.002147
         },
         {
           "schema_ok": true,
@@ -958,10 +943,10 @@
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1360,
-          "output_tokens": 141,
-          "latency_ms": 1753,
-          "cost": 0.002065
+          "input_tokens": 1422,
+          "output_tokens": 157,
+          "latency_ms": 1941,
+          "cost": 0.002207
         },
         {
           "schema_ok": true,
@@ -974,10 +959,10 @@
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1360,
-          "output_tokens": 146,
-          "latency_ms": 1822,
-          "cost": 0.00209
+          "input_tokens": 1422,
+          "output_tokens": 152,
+          "latency_ms": 1801,
+          "cost": 0.002182
         }
       ]
     },
@@ -995,10 +980,10 @@
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1273,
-          "output_tokens": 121,
-          "latency_ms": 1503,
-          "cost": 0.001878
+          "input_tokens": 1335,
+          "output_tokens": 123,
+          "latency_ms": 1466,
+          "cost": 0.00195
         },
         {
           "schema_ok": true,
@@ -1011,10 +996,10 @@
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1273,
-          "output_tokens": 131,
-          "latency_ms": 1503,
-          "cost": 0.001928
+          "input_tokens": 1335,
+          "output_tokens": 141,
+          "latency_ms": 1752,
+          "cost": 0.00204
         },
         {
           "schema_ok": true,
@@ -1027,10 +1012,10 @@
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1273,
-          "output_tokens": 135,
-          "latency_ms": 1639,
-          "cost": 0.001948
+          "input_tokens": 1335,
+          "output_tokens": 133,
+          "latency_ms": 1654,
+          "cost": 0.002
         }
       ]
     },
@@ -1044,38 +1029,18 @@
           "verdict": "caution",
           "raw_verdict": "caution",
           "warnings": [
-            "Unable to verify toxicity profile",
-            "Unable to verify care requirements",
-            "Recommend verifying plant identity and consulting additional plant care resources before purchase"
-          ],
-          "verdict_ok": true,
-          "warnings_ok_final": true,
-          "warnings_ok_raw": true,
-          "guardrail_fired": false,
-          "input_tokens": 1285,
-          "output_tokens": 125,
-          "latency_ms": 3928,
-          "cost": 0.00191
-        },
-        {
-          "schema_ok": true,
-          "failure": null,
-          "detail": null,
-          "verdict": "caution",
-          "raw_verdict": "caution",
-          "warnings": [
             "Unable to verify toxicity information",
-            "Unable to confirm care level requirements",
-            "Unable to confirm light and water needs"
+            "Unable to verify care requirements",
+            "Unable to verify light and water needs"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1285,
-          "output_tokens": 146,
-          "latency_ms": 1999,
-          "cost": 0.002015
+          "input_tokens": 1347,
+          "output_tokens": 136,
+          "latency_ms": 1953,
+          "cost": 0.002027
         },
         {
           "schema_ok": true,
@@ -1084,17 +1049,35 @@
           "verdict": "caution",
           "raw_verdict": "caution",
           "warnings": [
-            "Unable to confirm toxicity profile",
+            "Unable to confirm toxicity or safety information for this plant",
             "Unable to confirm care requirements"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1285,
-          "output_tokens": 127,
-          "latency_ms": 1910,
-          "cost": 0.00192
+          "input_tokens": 1347,
+          "output_tokens": 169,
+          "latency_ms": 2722,
+          "cost": 0.002192
+        },
+        {
+          "schema_ok": true,
+          "failure": null,
+          "detail": null,
+          "verdict": "caution",
+          "raw_verdict": "caution",
+          "warnings": [
+            "Unable to confirm toxicity or safety profile—verify the plant's identity and care requirements before purchase"
+          ],
+          "verdict_ok": true,
+          "warnings_ok_final": true,
+          "warnings_ok_raw": true,
+          "guardrail_fired": false,
+          "input_tokens": 1347,
+          "output_tokens": 141,
+          "latency_ms": 1954,
+          "cost": 0.002052
         }
       ]
     },
@@ -1108,16 +1091,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats if ingested; can cause oral irritation and gastrointestinal upset"
+            "Toxic to cats if ingested; causes oral irritation and gastrointestinal upset"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1290,
-          "output_tokens": 130,
-          "latency_ms": 3623,
-          "cost": 0.00194
+          "input_tokens": 1352,
+          "output_tokens": 136,
+          "latency_ms": 1899,
+          "cost": 0.002032
         },
         {
           "schema_ok": true,
@@ -1126,16 +1109,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats if ingested—causes oral irritation and gastrointestinal upset"
+            "Toxic to cats if ingested; causes oral irritation and gastrointestinal upset"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1290,
-          "output_tokens": 159,
-          "latency_ms": 1855,
-          "cost": 0.002085
+          "input_tokens": 1352,
+          "output_tokens": 142,
+          "latency_ms": 1845,
+          "cost": 0.002062
         },
         {
           "schema_ok": true,
@@ -1144,17 +1127,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to cats if ingested—can cause oral irritation and gastrointestinal upset",
-            "Also toxic to dogs"
+            "Toxic to cats if ingested or if sap contacts skin and is then ingested"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1290,
-          "output_tokens": 157,
-          "latency_ms": 1856,
-          "cost": 0.002075
+          "input_tokens": 1352,
+          "output_tokens": 140,
+          "latency_ms": 1860,
+          "cost": 0.002052
         }
       ]
     },
@@ -1168,18 +1150,18 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to dogs if ingested—causes oral discomfort and vomiting",
-            "Requires bright indirect light; unsuitable for low-light spaces",
-            "Needs frequent watering (every 7 days) and high maintenance"
+            "Toxic to dogs if ingested; causes oral discomfort and vomiting",
+            "Requires bright indirect light; low-light conditions will cause poor growth",
+            "Requires frequent watering (every 7 days) and high maintenance"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1300,
-          "output_tokens": 188,
-          "latency_ms": 2045,
-          "cost": 0.00224
+          "input_tokens": 1362,
+          "output_tokens": 178,
+          "latency_ms": 1859,
+          "cost": 0.002252
         },
         {
           "schema_ok": true,
@@ -1188,18 +1170,18 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to dogs if ingested—causes oral discomfort and vomiting",
-            "Requires bright indirect light (not compatible with low-light home)",
-            "Needs frequent watering (every 7 days) and high maintenance"
+            "Toxic to dogs if ingested; causes oral discomfort and vomiting",
+            "Requires bright indirect light; will decline in low-light conditions",
+            "Needs watering approximately every 7 days; requires consistent attention"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1300,
-          "output_tokens": 174,
-          "latency_ms": 1701,
-          "cost": 0.00217
+          "input_tokens": 1362,
+          "output_tokens": 175,
+          "latency_ms": 2106,
+          "cost": 0.002237
         },
         {
           "schema_ok": true,
@@ -1208,18 +1190,16 @@
           "verdict": "poor_fit",
           "raw_verdict": "poor_fit",
           "warnings": [
-            "Toxic to dogs if ingested—causes oral discomfort and vomiting",
-            "Requires bright light and frequent watering (every 7 days)",
-            "High-maintenance plant unsuitable for low-care households"
+            "Toxic to dogs if ingested; causes oral discomfort and vomiting"
           ],
           "verdict_ok": true,
           "warnings_ok_final": true,
           "warnings_ok_raw": true,
           "guardrail_fired": false,
-          "input_tokens": 1300,
-          "output_tokens": 183,
-          "latency_ms": 1855,
-          "cost": 0.002215
+          "input_tokens": 1362,
+          "output_tokens": 155,
+          "latency_ms": 1946,
+          "cost": 0.002137
         }
       ]
     }
